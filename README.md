@@ -1,141 +1,118 @@
-# Tirage LLM Based Response Solution (Mobile Application) - Integrated from Hikma
+# 🏥 Triage LLM-Based Response Solution (Mobile App)
+**🚀 Integrated from Hikma Health – Customized for Autonomous Emergency Medical Dispatch**
 
-The Hikma Health platform is a mobile electronic health record system designed for organizations working in low-resource settings to collect and access patient health information. The platform is a lightweight Android application that supports offline functionality and multiple languages including Arabic, Spanish, and English. The medical workflows are designed to be intuitive and allow for efficient patient registration and data entry in low-resource, dynamic, and mobile settings. You can see a user demo here: https://www.youtube.com/watch?v=kTL1OyF63tA
+This React Native application is adapted from the [Hikma Health mobile EHR platform](https://github.com/hikmahealth/hikma-health-app) to serve as the **frontline interface** for a modern AI-based triage and emergency response system.
 
-This repository contains the client-side code for Hikma Health's mobile application. The corresponding server-side code is located at https://github.com/hikmahealth/hikma-health-backend. Please feel free to file feature requests and bugs at either location.
+The system is designed to:
+- Collect and update **user medical profiles**
+- Trigger **LLM-based triage decisions**
+- Dispatch **autonomous drones with medication**
+- Enable **identity verification** and **QR wallet interactions**
+- Support **voice and chatbot interfaces** for medical queries and emergencies
 
-This app is built using React Native and can be compiled for either iOS or Android, although we do most of our testing on Android. 
-
-# Local Frontend Setup
-
-Requirements: local backend is running, and local db is populated with a clinic and a user.
-
-Fork frontend repository to your organization and clone
-
-**Point the selected instance to your local backend:**
------------------------------------------------------------
-In src/components/Login.tsx:
-If present, comment out the useEffect hook (lines 32-44)
-Change line 21 where the selectedInstance variable is defined, to this:
-```
- const [selectedInstance, setSelectedInstance] = useState({ name: 'local', url: 'http://10.0.2.2:8080' });
-```
-
-If you have 404 errors, you can try using [your_ip:8080] for the instance url, but [10.0.2.2] is an alias set up for local android development that works for most configurations.
-
-**Android Studio Setup**
-------------------------
-Download Android Studio and open the frontend repository there
-From AS, Open the Android Virtual Device (AVD) Manager by clicking on the icon below, found in the right portion of the top toolbar
-
-
-Within the AVD Manager, add the device(s) you would like to run in the emulator.
-(The app has been developed using a Nexus 7 Tablet and a Nexus 5X phone)
-Once added, click the green play button action on the right of the list to launch the AVD in the emulator
-
-in the android/app/ directory: 
-```
-keytool -genkey -v -keystore debug.keystore
-  -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000
-```
-
-If the debug.keystore file gets generated in the build directory, move it to the android/app directory.
-
-In your .bash_profile , set the following environment variables:
-```
-export ANDROID_HOME=$HOME/Library/Android/sdk
-export PATH=$PATH:$ANDROID_HOME/emulator
-export PATH=$PATH:$ANDROID_HOME/tools
-export PATH=$PATH:$ANDROID_HOME/tools/bin
-export PATH=$PATH:$ANDROID_HOME/platform-tools
-```
-
-Open a terminal in the frontend project, and
-```
-Npm install
-```
-(with the android emulator running)
-```
-React-native run-android
-```
-
-This should run the app on the emulator that you have running, and you should be able to login with the email and password of the local user that you created in the local backend setup.
-
-**Tips and Tricks**
--------------------
-Doublepress the ‘R’ key with the emulator in the foreground in order to recompile the app after making changes in the codebase.
-
-Sometimes you'll want to clear the device database when testing things - maybe you added some test data that you don't want to sync to your local psql db. To do this:
-change this line in `DatabaseInitialization.ts:`
-```
-    const dropAllTables = false;
-```
-to
-```
-    const dropAllTables = true;
-```
-
-Reload the app, and then be sure to change this line back and reload the app again.
-
-Creating APK
------------------
-A tutorial for building an APK can be found here: https://reactnative.dev/docs/signed-apk-android. You can also build the APK in Android Studio by adding Run/Debug configurations in your Android Studio project. Select the gradle project in the configuration (~/android) and the Gradle task ‘assembleRelease’.
-
-
-
-### 🚀 New Features to Be Implemented:
-
-| Feature | Description |
-|--------|-------------|
-| **User Medical Profile Expansion** | Additional fields for disability status, allergies, chronic conditions, blood type, home GPS address, mental health, and lifestyle indicators. |
-| **RAG Integration Button** | Daily health update form that triggers the backend (`rag.py`) to embed user data into vector database (FAISS). |
-| **Emergency Quick Action Button** | Allows user to send a **voice-based emergency request**, which is transcribed and passed to `emergency.py`. |
-| **Chatbot Interface (Optional)** | Allows user to chat with an LLM agent (Gemini/GPT) using their medical data contextually. |
-| **QR Code Wallet Integration** | Enables QR-based drug pickup verification and payment in future phases. |
-| **Triage Feedback View** | A page that shows LLM's decision (e.g. self-medicate vs. caretaker vs. ambulance dispatch) based on user context. |
+The backend is powered by:
+- `rag.py` for continuous profile embedding
+- `emergency.py` for triage decisions
+- `app.py` for general AI Q&A and chatbot responses
 
 ---
 
+## ✅ Key Features (Planned + In Progress)
 
-We will collaborate on a **branch-based Git workflow**, using feature branches like `feature/user-profile-expansion`, `feature/emergency-dispatch`, and `feature/rag-integration`.
+| Feature                        | Description                                                                 |
+|-------------------------------|-----------------------------------------------------------------------------|
+| **📋 Medical Profile Expansion**     | Form for allergies, disabilities, chronic conditions, blood type, medications, GPS address, etc. |
+| **🧠 RAG Trigger Button**            | Allows daily health input to be embedded in FAISS via `rag.py`.           |
+| **🚨 Emergency Dispatch Button**     | Voice-activated or tap-based trigger → sends request to `emergency.py`.   |
+| **💬 AI Chatbot (optional)**         | Conversational Q&A with LLM using user profile context.                   |
+| **🧾 QR Wallet Integration**         | QR code shows up upon identity auth, scanned by drone → confirms delivery and billing. |
+| **📈 Triage Feedback View**          | Visual display of decision: self-medicate, caregiver visit, or ambulance dispatch. |
 
 ---
 
-## 🛠️ Installation Guide
+## 📦 Tech Stack
 
-1. Clone the repo:
+- **Frontend**: React Native (Expo), TypeScript
+- **Backend**: FastAPI (Python), MongoDB, FAISS, LLMs (OpenAI GPT-4 or Gemini)
+- **Auth**: Facial recognition + passcode fallback
+- **Cloud**: AWS/GCP for scalable APIs, MongoDB Atlas for profile storage
+
+---
+
+## 🛠️ Local Setup Instructions
+
+### 1. Clone & Install
+
 ```bash
 git clone https://github.com/Lelekhoa1812/Triage-LLM-Based.git
 cd Triage-LLM-Based/frontend
-```
-
-2. Install dependencies:
-```bash
 npm install
 ```
 
-3. Start development server:
-```bash
-expo start
-```
-OR:
+### 2. Start with Expo (Recommended)
+
 ```bash
 npx expo start
 ```
 
-4. **Run on Emulator or Physical Device:**
-- For Android: Use Android Studio Emulator or Expo Go App (scan QR code)
-- For iOS: Use Xcode Simulator or Expo Go (on iPhone)
+Scan the QR with **Expo Go App** on Android/iOS device  
+or run on Android Studio Emulator / Xcode Simulator.
 
---- 
+---
 
-## 📦 Backend Integration
+## ⚙️ Backend Integration
 
-This app connects to a backend that will support:
-- `rag.py`       — For vector embedding updates
-- `emergency.py` — For AI-based triage decisions and emergency dispatch
-- `app.py`       — For chatbot or health assistant functionality
+Make sure these services are running:
 
-API routes will be added progressively as backend work is finalized.
+| Service         | Description                               |
+|----------------|-------------------------------------------|
+| `rag.py`        | Embeds updated medical profile to FAISS DB |
+| `emergency.py`  | Makes triage decisions based on context   |
+| `app.py`        | Handles chatbot-based general health Q&A  |
+
+Update `src/components/Login.tsx` to connect to your backend:
+
+```tsx
+const [selectedInstance, setSelectedInstance] = useState({
+  name: 'local',
+  url: 'http://10.0.2.2:8080'  // or your_ip:8080
+});
+```
+
+---
+
+## 🧪 Development Workflow
+
+Use **feature branches** for collaboration:
+
+```bash
+git checkout -b feature/<feature-name>
+```
+
+Suggested branches:
+- `feature/user-profile-expansion`
+- `feature/emergency-dispatch`
+- `feature/rag-integration`
+- `feature/qr-wallet-auth`
+- `feature/triage-decision-ui`
+
+---
+
+## 🔐 Identity & Security
+
+- Facial recognition (primary auth method)
+- Passcode fallback option
+- QR code generated post-auth for:
+    - Drone delivery confirmation
+    - Medication access + payment verification
+
+---
+
+## 📲 APK Build (Optional)
+
+Follow React Native's [official APK guide](https://reactnative.dev/docs/signed-apk-android)  
+or use Android Studio:
+1. Open the project
+2. Add new Run/Debug config → Gradle task → `assembleRelease`
 
 ---

@@ -15,8 +15,6 @@
       <change beforePath="$PROJECT_DIR$/../../ENG30002/garbage/testing/testing_2.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/../../ENG30002/garbage/testing/testing_2.jpg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../ENG30002/garbage/testing/testing_3.jpg" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../../ENG30002/garbage/testing/testing_4.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/../../ENG30002/garbage/testing/testing_4.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,7 +47,7 @@
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "master",
+    "git-widget-placeholder": "<unknown>",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "/Users/khoale/Downloads/ENG40011/Triage-LLM-Based",
     "show.migrate.to.gradle.popup": "false"
