@@ -1,0 +1,141 @@
+# Tirage LLM Based Response Solution (Mobile Application) - Integrated from Hikma
+
+The Hikma Health platform is a mobile electronic health record system designed for organizations working in low-resource settings to collect and access patient health information. The platform is a lightweight Android application that supports offline functionality and multiple languages including Arabic, Spanish, and English. The medical workflows are designed to be intuitive and allow for efficient patient registration and data entry in low-resource, dynamic, and mobile settings. You can see a user demo here: https://www.youtube.com/watch?v=kTL1OyF63tA
+
+This repository contains the client-side code for Hikma Health's mobile application. The corresponding server-side code is located at https://github.com/hikmahealth/hikma-health-backend. Please feel free to file feature requests and bugs at either location.
+
+This app is built using React Native and can be compiled for either iOS or Android, although we do most of our testing on Android. 
+
+# Local Frontend Setup
+
+Requirements: local backend is running, and local db is populated with a clinic and a user.
+
+Fork frontend repository to your organization and clone
+
+**Point the selected instance to your local backend:**
+-----------------------------------------------------------
+In src/components/Login.tsx:
+If present, comment out the useEffect hook (lines 32-44)
+Change line 21 where the selectedInstance variable is defined, to this:
+```
+ const [selectedInstance, setSelectedInstance] = useState({ name: 'local', url: 'http://10.0.2.2:8080' });
+```
+
+If you have 404 errors, you can try using [your_ip:8080] for the instance url, but [10.0.2.2] is an alias set up for local android development that works for most configurations.
+
+**Android Studio Setup**
+------------------------
+Download Android Studio and open the frontend repository there
+From AS, Open the Android Virtual Device (AVD) Manager by clicking on the icon below, found in the right portion of the top toolbar
+
+
+Within the AVD Manager, add the device(s) you would like to run in the emulator.
+(The app has been developed using a Nexus 7 Tablet and a Nexus 5X phone)
+Once added, click the green play button action on the right of the list to launch the AVD in the emulator
+
+in the android/app/ directory: 
+```
+keytool -genkey -v -keystore debug.keystore
+  -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000
+```
+
+If the debug.keystore file gets generated in the build directory, move it to the android/app directory.
+
+In your .bash_profile , set the following environment variables:
+```
+export ANDROID_HOME=$HOME/Library/Android/sdk
+export PATH=$PATH:$ANDROID_HOME/emulator
+export PATH=$PATH:$ANDROID_HOME/tools
+export PATH=$PATH:$ANDROID_HOME/tools/bin
+export PATH=$PATH:$ANDROID_HOME/platform-tools
+```
+
+Open a terminal in the frontend project, and
+```
+Npm install
+```
+(with the android emulator running)
+```
+React-native run-android
+```
+
+This should run the app on the emulator that you have running, and you should be able to login with the email and password of the local user that you created in the local backend setup.
+
+**Tips and Tricks**
+-------------------
+Doublepress the ‘R’ key with the emulator in the foreground in order to recompile the app after making changes in the codebase.
+
+Sometimes you'll want to clear the device database when testing things - maybe you added some test data that you don't want to sync to your local psql db. To do this:
+change this line in `DatabaseInitialization.ts:`
+```
+    const dropAllTables = false;
+```
+to
+```
+    const dropAllTables = true;
+```
+
+Reload the app, and then be sure to change this line back and reload the app again.
+
+Creating APK
+-----------------
+A tutorial for building an APK can be found here: https://reactnative.dev/docs/signed-apk-android. You can also build the APK in Android Studio by adding Run/Debug configurations in your Android Studio project. Select the gradle project in the configuration (~/android) and the Gradle task ‘assembleRelease’.
+
+
+
+### 🚀 New Features to Be Implemented:
+
+| Feature | Description |
+|--------|-------------|
+| **User Medical Profile Expansion** | Additional fields for disability status, allergies, chronic conditions, blood type, home GPS address, mental health, and lifestyle indicators. |
+| **RAG Integration Button** | Daily health update form that triggers the backend (`rag.py`) to embed user data into vector database (FAISS). |
+| **Emergency Quick Action Button** | Allows user to send a **voice-based emergency request**, which is transcribed and passed to `emergency.py`. |
+| **Chatbot Interface (Optional)** | Allows user to chat with an LLM agent (Gemini/GPT) using their medical data contextually. |
+| **QR Code Wallet Integration** | Enables QR-based drug pickup verification and payment in future phases. |
+| **Triage Feedback View** | A page that shows LLM's decision (e.g. self-medicate vs. caretaker vs. ambulance dispatch) based on user context. |
+
+---
+
+
+We will collaborate on a **branch-based Git workflow**, using feature branches like `feature/user-profile-expansion`, `feature/emergency-dispatch`, and `feature/rag-integration`.
+
+---
+
+## 🛠️ Installation Guide
+
+1. Clone the repo:
+```bash
+git clone https://github.com/Lelekhoa1812/Triage-LLM-Based.git
+cd Triage-LLM-Based/frontend
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Start development server:
+```bash
+expo start
+```
+OR:
+```bash
+npx expo start
+```
+
+4. **Run on Emulator or Physical Device:**
+- For Android: Use Android Studio Emulator or Expo Go App (scan QR code)
+- For iOS: Use Xcode Simulator or Expo Go (on iPhone)
+
+--- 
+
+## 📦 Backend Integration
+
+This app connects to a backend that will support:
+- `rag.py`       — For vector embedding updates
+- `emergency.py` — For AI-based triage decisions and emergency dispatch
+- `app.py`       — For chatbot or health assistant functionality
+
+API routes will be added progressively as backend work is finalized.
+
+---
