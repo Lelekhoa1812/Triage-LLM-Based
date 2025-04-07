@@ -1,5 +1,5 @@
 # 🏥 Triage LLM-Based Response Solution (Mobile App)
-**🚀 Integrated from Hikma Health – Customized for Autonomous Emergency Medical Dispatch**
+**🚀 Integrated from [Hikma Health](https://github.com/hikmahealth/hikma-health-app) – Customized for Autonomous Emergency Medical Dispatch**
 
 This React Native application is adapted from the [Hikma Health mobile EHR platform](https://github.com/hikmahealth/hikma-health-app) to serve as the **frontline interface** for a modern AI-based triage and emergency response system.
 
