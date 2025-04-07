@@ -1,5 +1,5 @@
 # 🏥 Triage LLM-Based Response Solution (Mobile App)
-**🚀 Integrated from [Hikma Health](https://github.com/hikmahealth/hikma-health-app) – Customized for Autonomous Emergency Medical Dispatch**
+**🚀 Integrated from **Hikma Health** – Customized for Autonomous Emergency Medical Dispatch**
 
 This React Native application is adapted from the [Hikma Health mobile EHR platform](https://github.com/hikmahealth/hikma-health-app) to serve as the **frontline interface** for a modern AI-based triage and emergency response system.
 
@@ -45,14 +45,23 @@ The backend is powered by:
 
 ```bash
 git clone https://github.com/Lelekhoa1812/Triage-LLM-Based.git
-cd Triage-LLM-Based/frontend
-npm install
+cd Triage-LLM-Based
+yarn install
 ```
 
 ### 2. Start with Expo (Recommended)
 
 ```bash
 npx expo start
+```
+OR with **Yarn**:
+```bash
+yarn start
+```
+
+### Notice: If Yarn failed, scale down NodeJS with compatible Yarn
+```bash
+NODE_OPTIONS=--openssl-legacy-provider yarn start
 ```
 
 Scan the QR with **Expo Go App** on Android/iOS device  

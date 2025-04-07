@@ -5,16 +5,41 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ea92c235-7060-4019-8a26-678f3e4f3070" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../../ENG30002/garbage/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../../ENG30002/garbage/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../ENG30002/garbage/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../ENG30002/garbage/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../ENG30002/garbage/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../../ENG30002/garbage/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../ENG30002/garbage/src/ocean3.jpeg" beforeDir="false" afterPath="$PROJECT_DIR$/../../ENG30002/garbage/src/ocean3.jpeg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../ENG30002/garbage/src/ocean4.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../ENG30002/garbage/synthetic.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../ENG30002/garbage/synthetic.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../ENG30002/garbage/testing/testing_1.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/../../ENG30002/garbage/testing/testing_1.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../ENG30002/garbage/testing/testing_2.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/../../ENG30002/garbage/testing/testing_2.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../ENG30002/garbage/testing/testing_3.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../ENG30002/garbage/testing/testing_4.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/../../ENG30002/garbage/testing/testing_4.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/java/com/example/climber/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/java/com/example/climber/MainActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/drawable/ic_launcher_background.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/drawable/ic_launcher_background.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/layout-land/activity_main.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/layout-land/activity_main.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/layout/activity_main.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/layout/activity_main.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/mipmap-hdpi/ic_launcher.webp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/mipmap-hdpi/ic_launcher.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/mipmap-hdpi/ic_launcher_round.webp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/mipmap-hdpi/ic_launcher_round.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/mipmap-mdpi/ic_launcher.webp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/mipmap-mdpi/ic_launcher.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/mipmap-mdpi/ic_launcher_round.webp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/mipmap-mdpi/ic_launcher_round.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/mipmap-xhdpi/ic_launcher.webp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/mipmap-xhdpi/ic_launcher.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/mipmap-xhdpi/ic_launcher_round.webp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/mipmap-xhdpi/ic_launcher_round.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/mipmap-xxhdpi/ic_launcher.webp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/mipmap-xxhdpi/ic_launcher.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp" beforeDir="false" afterPath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/values-vi/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/values-vi/strings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/values/colors.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/values/colors.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/app/src/main/res/values/strings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/../../Downloads/COS30017/A1/Climber/settings.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/W3/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/W3/.idea/.name" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/W3/.idea/gradle.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/W3/.idea/migrations.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/W3/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/W3/L03-ManyImages" beforeDir="false" afterPath="$PROJECT_DIR$/../../Downloads/COS30017/W3/L03-ManyImages" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/W3/Light_Me_Up" beforeDir="false" afterPath="$PROJECT_DIR$/../../Downloads/COS30017/W3/Light_Me_Up" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/W3/w03-calculations-Lelekhoa1812" beforeDir="false" afterPath="$PROJECT_DIR$/../../Downloads/COS30017/W3/w03-calculations-Lelekhoa1812" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/execute_kotlin_terminal.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS30017/github_instructions.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/COS40007/Project/server/backend/model_top_site.pkl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/Shopapp/Shop-Application" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Downloads/Shopapp/shopapp-angular" beforeDir="false" afterPath="$PROJECT_DIR$/../../Downloads/Shopapp/shopapp-angular" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
