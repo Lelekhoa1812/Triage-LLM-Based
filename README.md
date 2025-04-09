@@ -43,7 +43,7 @@ The backend is powered by:
 #### 📦 Prerequisites
 Make sure the following tools are installed on your machine:
 - [Homebrew](https://brew.sh/)
-  - [Node.js (v16 recommended)](https://nodejs.org/) 
+  - [Node.js (v16/18 recommended)](https://nodejs.org/) 
 - [Watchman (for macOS)](https://facebook.github.io/watchman/)
 - [Yarn](https://classic.yarnpkg.com/lang/en/docs/install/)
 - [Java 11](https://sdkman.io/)
@@ -68,7 +68,7 @@ java -version
 ```
 
 #### 📦 3. Install Node Modules
-Run script `nvm install 16` and `nvm use 16` to scale down to Node16
+Run script `nvm install 18` and `nvm use 18` to scale down to Node16
 ```bash
 yarn install
 ```
