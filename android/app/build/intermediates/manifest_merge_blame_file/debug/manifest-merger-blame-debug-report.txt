@@ -1,0 +1,137 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.hikma_health_app"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="16"
+9        android:targetSdkVersion="29" />
+10
+11    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+11-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/debug/AndroidManifest.xml:5:5-77
+11-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/debug/AndroidManifest.xml:5:22-75
+12    <uses-permission android:name="android.permission.INTERNET" />
+12-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/main/AndroidManifest.xml:4:5-67
+12-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/main/AndroidManifest.xml:4:22-64
+13    <uses-permission android:name="android.permission.CAMERA" />
+13-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/main/AndroidManifest.xml:5:5-65
+13-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/main/AndroidManifest.xml:5:22-62
+14    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+14-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/main/AndroidManifest.xml:6:5-80
+14-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/main/AndroidManifest.xml:6:22-77
+15    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+15-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/main/AndroidManifest.xml:7:5-81
+15-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/main/AndroidManifest.xml:7:22-78
+16    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+16-->[:@react-native-community_netinfo] /Users/khoale/Downloads/ENG40011/Triage-LLM-Based/node_modules/@react-native-community/netinfo/android/build/intermediates/library_manifest/debug/AndroidManifest.xml:9:5-79
+16-->[:@react-native-community_netinfo] /Users/khoale/Downloads/ENG40011/Triage-LLM-Based/node_modules/@react-native-community/netinfo/android/build/intermediates/library_manifest/debug/AndroidManifest.xml:9:22-76
+17    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+17-->[:@react-native-community_netinfo] /Users/khoale/Downloads/ENG40011/Triage-LLM-Based/node_modules/@react-native-community/netinfo/android/build/intermediates/library_manifest/debug/AndroidManifest.xml:10:5-76
+17-->[:@react-native-community_netinfo] /Users/khoale/Downloads/ENG40011/Triage-LLM-Based/node_modules/@react-native-community/netinfo/android/build/intermediates/library_manifest/debug/AndroidManifest.xml:10:22-73
+18
+19    <uses-feature
+19-->[:react-native-camera] /Users/khoale/Downloads/ENG40011/Triage-LLM-Based/node_modules/react-native-camera/android/build/intermediates/library_manifest/generalDebug/AndroidManifest.xml:11:5-13:36
+20        android:name="android.hardware.camera"
+20-->[:react-native-camera] /Users/khoale/Downloads/ENG40011/Triage-LLM-Based/node_modules/react-native-camera/android/build/intermediates/library_manifest/generalDebug/AndroidManifest.xml:12:9-47
+21        android:required="false" />
+21-->[:react-native-camera] /Users/khoale/Downloads/ENG40011/Triage-LLM-Based/node_modules/react-native-camera/android/build/intermediates/library_manifest/generalDebug/AndroidManifest.xml:13:9-33
+22    <uses-feature
+22-->[:react-native-camera] /Users/khoale/Downloads/ENG40011/Triage-LLM-Based/node_modules/react-native-camera/android/build/intermediates/library_manifest/generalDebug/AndroidManifest.xml:14:5-16:36
+23        android:name="android.hardware.camera.autofocus"
+23-->[:react-native-camera] /Users/khoale/Downloads/ENG40011/Triage-LLM-Based/node_modules/react-native-camera/android/build/intermediates/library_manifest/generalDebug/AndroidManifest.xml:15:9-57
+24        android:required="false" />
+24-->[:react-native-camera] /Users/khoale/Downloads/ENG40011/Triage-LLM-Based/node_modules/react-native-camera/android/build/intermediates/library_manifest/generalDebug/AndroidManifest.xml:16:9-33
+25
+26    <uses-permission android:name="android.permission.READ_PHONE_STATE" /> <!-- Required to access Google Play Licensing -->
+27    <uses-permission android:name="com.android.vending.CHECK_LICENSE" />
+27-->[:rn-fetch-blob] /Users/khoale/Downloads/ENG40011/Triage-LLM-Based/node_modules/rn-fetch-blob/android/build/intermediates/library_manifest/debug/AndroidManifest.xml:12:5-73
+27-->[:rn-fetch-blob] /Users/khoale/Downloads/ENG40011/Triage-LLM-Based/node_modules/rn-fetch-blob/android/build/intermediates/library_manifest/debug/AndroidManifest.xml:12:22-70
+28    <!--
+29         Required to keep CPU alive while downloading files
+30        (NOT to keep screen awake)
+31    -->
+32    <uses-permission android:name="android.permission.WAKE_LOCK" />
+32-->[:rn-fetch-blob] /Users/khoale/Downloads/ENG40011/Triage-LLM-Based/node_modules/rn-fetch-blob/android/build/intermediates/library_manifest/debug/AndroidManifest.xml:21:5-68
+32-->[:rn-fetch-blob] /Users/khoale/Downloads/ENG40011/Triage-LLM-Based/node_modules/rn-fetch-blob/android/build/intermediates/library_manifest/debug/AndroidManifest.xml:21:22-65
+33
+34    <application
+34-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/main/AndroidManifest.xml:9:5-28:19
+35        android:name="com.hikma_health_app.MainApplication"
+35-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/main/AndroidManifest.xml:10:7-38
+36        android:allowBackup="false"
+36-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/main/AndroidManifest.xml:14:7-34
+37        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+37-->[androidx.core:core:1.1.0-rc01] /Users/khoale/.gradle/caches/transforms-2/files-2.1/059c0c5385661f31fc8f2017072a1003/core-1.1.0-rc01/AndroidManifest.xml:24:18-86
+38        android:debuggable="true"
+39        android:icon="@mipmap/ic_launcher"
+39-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/main/AndroidManifest.xml:12:7-41
+40        android:label="@string/app_name"
+40-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/main/AndroidManifest.xml:11:7-39
+41        android:roundIcon="@mipmap/ic_launcher_round"
+41-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/main/AndroidManifest.xml:13:7-52
+42        android:theme="@style/AppTheme"
+42-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/main/AndroidManifest.xml:15:7-38
+43        android:usesCleartextTraffic="true" >
+43-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/main/AndroidManifest.xml:16:7-42
+44        <activity
+44-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/main/AndroidManifest.xml:17:7-26:18
+45            android:name="com.hikma_health_app.MainActivity"
+45-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/main/AndroidManifest.xml:18:9-37
+46            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+46-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/main/AndroidManifest.xml:20:9-79
+47            android:label="@string/app_name"
+47-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/main/AndroidManifest.xml:19:9-41
+48            android:windowSoftInputMode="adjustPan" >
+48-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/main/AndroidManifest.xml:21:9-48
+49            <intent-filter>
+49-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/main/AndroidManifest.xml:22:9-25:25
+50                <action android:name="android.intent.action.MAIN" />
+50-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/main/AndroidManifest.xml:23:13-65
+50-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/main/AndroidManifest.xml:23:21-62
+51
+52                <category android:name="android.intent.category.LAUNCHER" />
+52-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/main/AndroidManifest.xml:24:13-73
+52-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/main/AndroidManifest.xml:24:23-70
+53            </intent-filter>
+54        </activity>
+55        <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" />
+55-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/main/AndroidManifest.xml:27:7-84
+55-->/Users/khoale/Downloads/ENG40011/Triage-LLM-Based/android/app/src/main/AndroidManifest.xml:27:17-81
+56
+57        <provider
+57-->[:rn-fetch-blob] /Users/khoale/Downloads/ENG40011/Triage-LLM-Based/node_modules/rn-fetch-blob/android/build/intermediates/library_manifest/debug/AndroidManifest.xml:36:9-44:20
+58            android:name="com.RNFetchBlob.Utils.FileProvider"
+58-->[:rn-fetch-blob] /Users/khoale/Downloads/ENG40011/Triage-LLM-Based/node_modules/rn-fetch-blob/android/build/intermediates/library_manifest/debug/AndroidManifest.xml:37:13-62
+59            android:authorities="com.hikma_health_app.provider"
+59-->[:rn-fetch-blob] /Users/khoale/Downloads/ENG40011/Triage-LLM-Based/node_modules/rn-fetch-blob/android/build/intermediates/library_manifest/debug/AndroidManifest.xml:38:13-60
+60            android:exported="false"
+60-->[:rn-fetch-blob] /Users/khoale/Downloads/ENG40011/Triage-LLM-Based/node_modules/rn-fetch-blob/android/build/intermediates/library_manifest/debug/AndroidManifest.xml:39:13-37
+61            android:grantUriPermissions="true" >
+61-->[:rn-fetch-blob] /Users/khoale/Downloads/ENG40011/Triage-LLM-Based/node_modules/rn-fetch-blob/android/build/intermediates/library_manifest/debug/AndroidManifest.xml:40:13-47
+62            <meta-data
+62-->[:rn-fetch-blob] /Users/khoale/Downloads/ENG40011/Triage-LLM-Based/node_modules/rn-fetch-blob/android/build/intermediates/library_manifest/debug/AndroidManifest.xml:41:13-43:58
+63                android:name="android.support.FILE_PROVIDER_PATHS"
+63-->[:rn-fetch-blob] /Users/khoale/Downloads/ENG40011/Triage-LLM-Based/node_modules/rn-fetch-blob/android/build/intermediates/library_manifest/debug/AndroidManifest.xml:42:17-67
+64                android:resource="@xml/provider_paths" />
+64-->[:rn-fetch-blob] /Users/khoale/Downloads/ENG40011/Triage-LLM-Based/node_modules/rn-fetch-blob/android/build/intermediates/library_manifest/debug/AndroidManifest.xml:43:17-55
+65        </provider>
+66
+67        <activity
+67-->[com.google.android.gms:play-services-base:16.0.1] /Users/khoale/.gradle/caches/transforms-2/files-2.1/5f0c3f174341c45d5a5bff4875c1a74b/jetified-play-services-base-16.0.1/AndroidManifest.xml:23:9-26:75
+68            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+68-->[com.google.android.gms:play-services-base:16.0.1] /Users/khoale/.gradle/caches/transforms-2/files-2.1/5f0c3f174341c45d5a5bff4875c1a74b/jetified-play-services-base-16.0.1/AndroidManifest.xml:24:13-79
+69            android:exported="false"
+69-->[com.google.android.gms:play-services-base:16.0.1] /Users/khoale/.gradle/caches/transforms-2/files-2.1/5f0c3f174341c45d5a5bff4875c1a74b/jetified-play-services-base-16.0.1/AndroidManifest.xml:25:13-37
+70            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+70-->[com.google.android.gms:play-services-base:16.0.1] /Users/khoale/.gradle/caches/transforms-2/files-2.1/5f0c3f174341c45d5a5bff4875c1a74b/jetified-play-services-base-16.0.1/AndroidManifest.xml:26:13-72
+71
+72        <meta-data
+72-->[com.google.android.gms:play-services-basement:16.1.0] /Users/khoale/.gradle/caches/transforms-2/files-2.1/fde72345d1019e91e017c5e87d76940e/jetified-play-services-basement-16.1.0/AndroidManifest.xml:23:9-25:69
+73            android:name="com.google.android.gms.version"
+73-->[com.google.android.gms:play-services-basement:16.1.0] /Users/khoale/.gradle/caches/transforms-2/files-2.1/fde72345d1019e91e017c5e87d76940e/jetified-play-services-basement-16.1.0/AndroidManifest.xml:24:13-58
+74            android:value="@integer/google_play_services_version" />
+74-->[com.google.android.gms:play-services-basement:16.1.0] /Users/khoale/.gradle/caches/transforms-2/files-2.1/fde72345d1019e91e017c5e87d76940e/jetified-play-services-basement-16.1.0/AndroidManifest.xml:25:13-66
+75    </application>
+76
+77</manifest>
