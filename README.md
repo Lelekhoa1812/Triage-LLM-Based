@@ -43,7 +43,7 @@ The backend is powered by:
 #### 📦 Prerequisites
 Make sure the following tools are installed on your machine:
 - [Homebrew](https://brew.sh/)
-- [Node.js (v16 or v18 recommended)](https://nodejs.org/)
+  - [Node.js (v16 recommended)](https://nodejs.org/) 
 - [Watchman (for macOS)](https://facebook.github.io/watchman/)
 - [Yarn](https://classic.yarnpkg.com/lang/en/docs/install/)
 - [Java 11](https://sdkman.io/)
@@ -68,10 +68,11 @@ java -version
 ```
 
 #### 📦 3. Install Node Modules
+Run script `nvm install 16` and `nvm use 16` to scale down to Node16
 ```bash
 yarn install
 ```
-_or, if you're using npm:_
+_Or, if you're using npm:_
 ```bash
 npm install
 ```
@@ -120,7 +121,12 @@ export PATH=$PATH:$HOME/Library/Android/sdk/platform-tools
 ```
 - If build fails due to missing NDK, open Android Studio > SDK Manager > SDK Tools > Install **NDK (Side by side)**
 - If using a physical Android device, make sure USB debugging is enabled and `adb devices` shows your device.
+Verify it again:
+```bash
+adb devices 
+```
 
+#### 📲 Run app on physical device
 Scan the QR with **Expo Go App** on Android/iOS device or run on Android Studio Emulator / Xcode Simulator.
 
 ---
