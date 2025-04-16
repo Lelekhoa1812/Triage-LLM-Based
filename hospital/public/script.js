@@ -1,4 +1,4 @@
-// File: hospital/script.js
+// File: hospital/public/script.js
 fetch("https://BinKhoaLe1812-Triage_LLM.hf.space", {
   method: "POST",
   headers: { "Content-Type": "application/json" },

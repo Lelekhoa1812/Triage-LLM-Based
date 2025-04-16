@@ -1,7 +1,7 @@
-/* File: caretaker/style.css */
+/* File: pharmacy/public/style.css */
 body {
     font-family: Arial, sans-serif;
-    background: #f9f9ff;
+    background: #f0f8ff;
     padding: 20px;
   }
   .container {
@@ -15,7 +15,7 @@ body {
   #log {
     margin-top: 20px;
     padding: 10px;
-    background: #f0f0ff;
-    border: 1px solid #ccccff;
+    background: #e6f7e6;
+    border: 1px solid #b3ddb3;
     border-radius: 5px;
   }

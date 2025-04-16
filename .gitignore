@@ -3,3 +3,8 @@ backend/.env
 
 # Frontend
 frontend/node_modules
+
+# API
+hospital/.vercel
+caretaker/.vercel
+pharmacy/.vercel

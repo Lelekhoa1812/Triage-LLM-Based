@@ -101,15 +101,27 @@ async def handle_emergency(data: dict):
     # Based on the decision, call the corresponding API
     if emergency_type == "self-care" or "drone" in llm_decision.lower():
         # Dispatch Drone for Medication
-        response = requests.post(PHARMACY_API, json={"user": user_summary})
+        response = requests.post(PHARMACY_API, 
+                                json={
+                                "action": "dispatch",
+                                "status": "dispatched",
+                                "user": user_summary})
         return {"status": "success", "message": "Medication dispatched via drone."}
     elif emergency_type == "caretaker" or "caretaker" in llm_decision.lower():
         # Send caretaker assistance
-        response = requests.post(CARETAKER_API, json={"user": user_summary})
+        response = requests.post(CARETAKER_API,                                  
+                                json={
+                                "action": "send_caretaker",
+                                "status": "dispatched",
+                                "user": user_summary})
         return {"status": "success", "message": "Caretaker dispatched to assist user."}
     elif emergency_type == "ambulance" or "ambulance" in llm_decision.lower():
         # Dispatch ambulance
-        response = requests.post(HOSPITAL_API, json={"user": user_summary})
+        response = requests.post(HOSPITAL_API, 
+                                json={
+                                "action": "ambulance",
+                                "status": "dispatched",
+                                "user": user_summary})
         return {"status": "success", "message": "Ambulance dispatched to user's location."}
 
     return {"status": "error", "message": "Invalid emergency type or LLM decision not clear."}
