@@ -1,0 +1,21 @@
+/* File: hospital/style.css */
+body {
+  font-family: Arial, sans-serif;
+  background: #fff5f5;
+  padding: 20px;
+}
+.container {
+  max-width: 600px;
+  margin: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+#log {
+  margin-top: 20px;
+  padding: 10px;
+  background: #ffe6e6;
+  border: 1px solid #ffcccc;
+  border-radius: 5px;
+}
