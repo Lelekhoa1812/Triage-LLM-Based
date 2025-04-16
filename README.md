@@ -12,5 +12,5 @@ git push hf main
 
 Frontend branch
 ```bash
-git push fe main
+git push fe master
 ```
