@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Triage Response System</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Emergency Triage System</h1>
+    </header>
+    
+    <section id="profile-section">
+      <h2>My Medical Profile</h2>
+      <form id="profile-form">
+        <label>Name: <input type="text" id="name" required></label>
+        <label>Age: <input type="number" id="age" required></label>
+        <label>Sex: <input type="text" id="sex"></label>
+        <label>Blood Type: <input type="text" id="blood_type"></label>
+        <label>Allergies: <input type="text" id="allergies"></label>
+        <label>Medical History: <textarea id="medical_history"></textarea></label>
+        <label>Current Medications: <textarea id="active_medications"></textarea></label>
+        <label>Disability Condition: <input type="text" id="disability"></label>
+        <label>Home Address: <input type="text" id="home_address"></label>
+        <button type="submit">Save Profile</button>
+      </form>
+    </section>
+
+    <section id="emergency-section">
+      <h2>Emergency Request</h2>
+      <button id="emergency-button" class="red-button">Emergency</button>
+      <p id="voice-output"></p>
+    </section>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
