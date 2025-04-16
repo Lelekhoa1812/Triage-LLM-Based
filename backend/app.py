@@ -113,7 +113,6 @@ async def handle_emergency(data: dict):
                                 json={
                                 "action": "send_caretaker",
                                 "status": "dispatched",
-                                
                                 "user": user_summary})
         return {"status": "success", "message": "Caretaker dispatched to assist user."}
     elif emergency_type == "ambulance" or "ambulance" in llm_decision.lower():
