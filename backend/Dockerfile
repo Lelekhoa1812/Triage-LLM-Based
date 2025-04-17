@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Set environment variables
+# Set environment variables (may need to change authority)
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
@@ -15,7 +15,7 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 COPY . /app
 
 # Expose the port used by Uvicorn
-EXPOSE 7870
+EXPOSE 7860
 
 # Run the FastAPI application using Uvicorn
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7870"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]
