@@ -13,3 +13,4 @@ pharmacy/.vercel
 
 # Embedding
 embedding/.git
+embedding/.env
