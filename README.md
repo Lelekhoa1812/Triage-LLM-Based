@@ -14,3 +14,8 @@ Frontend branch
 ```bash
 git push fe master
 ```
+
+Embedding branch
+```bash
+git push eb main
+```

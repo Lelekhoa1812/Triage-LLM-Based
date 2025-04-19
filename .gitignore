@@ -1,11 +1,15 @@
 # Backend
 backend/.env
+backend/.git
 
 # Frontend
 frontend/node_modules
+frontend/.git
 
 # API
 hospital/.vercel
 caretaker/.vercel
 pharmacy/.vercel
 
+# Embedding
+embedding/.git
