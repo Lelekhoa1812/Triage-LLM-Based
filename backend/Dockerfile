@@ -4,7 +4,9 @@ FROM python:3.11-slim
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# Create working directory
+# Create working directory (and authorised token)
+ARG HF_TOKEN
+ENV HF_TOKEN=${HF_TOKEN}
 WORKDIR /app
 
 # Copy and install dependencies

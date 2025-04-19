@@ -1,8 +1,8 @@
 ---
 title: Medical Profile
-emoji: 🚀
-colorFrom: purple
-colorTo: gray
+emoji: 💾
+colorFrom: green
+colorTo: indigo
 sdk: docker
 pinned: false
 license: apache-2.0
