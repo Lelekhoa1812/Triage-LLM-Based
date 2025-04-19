@@ -1,25 +1,30 @@
-# 1. Base image
 FROM python:3.10-slim
 
-# 2. Set working directory
 WORKDIR /app
 
-# 3. Install system deps for faiss
+# Install OS-level dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-      build-essential \
-      git \
-    && rm -rf /var/lib/apt/lists/*
+    build-essential \
+    git && \
+    rm -rf /var/lib/apt/lists/*
 
-# 4. Copy requirements and install
+# Copy and install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 5. Copy app code
-COPY rag.py .
+# Create cache directory and set permissions
+RUN mkdir -p /app/.cache && chmod -R 777 /app/.cache
 
-# 6. Expose HF Spaces default port
+# Pre-download SentenceTransformer model AFTER installation
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
+
+# Copy the app code
+COPY . .
+
+# Set Hugging Face cache env vars
+ENV HF_HOME=/app/.cache
+
 EXPOSE 7860
 
-# 7. Entrypoint
 CMD ["uvicorn", "rag:app", "--host", "0.0.0.0", "--port", "7860"]

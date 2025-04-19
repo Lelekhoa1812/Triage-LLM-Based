@@ -6,11 +6,37 @@
   <link rel="stylesheet" href="/statics/styles.css">
 </head>
 <body>
+    <!-- Login/Register Modal -->
+    <div class="modal-overlay" id="loginRegisterModal">
+      <div class="modal-wrapper">
+          <!-- Login Section -->
+          <div class="modal-section login-section" id="loginSection">
+              <h2>LOGIN</h2>
+              <div class="modal-content">
+                  <input type="text" id="userName" placeholder="Your username" class="modal-input">
+                  <input type="password" id="userPassword" placeholder="Your password" class="modal-input">
+                  <button id="loginBtn" class="modal-button">Login</button>
+                  <button id="showRegisterBtn" class="modal-button">Register Account</button>
+              </div>
+          </div>
+          <!-- Register Section -->
+          <div class="modal-section register-section collapsed" id="registerSection">
+              <h3>REGISTER</h3>
+              <div class="modal-content">
+                  <input type="text" id="newUserName" placeholder="Your username" class="modal-input">
+                  <input type="password" id="newUserPassword" placeholder="Your password" class="modal-input">
+                  <button id="createAccountBtn" class="modal-button">Create Account</button>
+                  <button id="showLoginBtn" class="modal-button">Back to Login</button>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- Main Page -->
   <div class="container">
     <header>
       <h1>Emergency Triage System</h1>
     </header>
-    
     <section id="profile-section">
       <h2>My Medical Profile</h2>
       <form id="profile-form">
@@ -22,7 +48,7 @@
         <label>Medical History: <textarea id="medical_history"></textarea></label>
         <label>Current Medications: <textarea id="active_medications"></textarea></label>
         <label>Disability Condition: <input type="text" id="disability"></label>
-        <label>Home Address: <input type="text" id="home_address"></label>
+        <label>Home Address: <input type="text" id="home_address" required></label>
         <button type="submit">Save Profile</button>
       </form>
     </section>

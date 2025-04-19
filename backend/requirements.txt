@@ -1,6 +1,7 @@
 # Server
 fastapi
 uvicorn
+huggingface_hub
 
 # UI (optional)
 aiofiles

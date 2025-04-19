@@ -1,6 +1,6 @@
 import os
 import requests
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from pymongo import MongoClient
@@ -15,7 +15,7 @@ app = FastAPI(title="Emergency Response System")
 # MongoDB connection
 mongo_uri = os.getenv("PROFILE_URI")
 client = MongoClient(mongo_uri)
-db = client["MedicalChatbotDB"]
+db = client["user"]
 user_collection = db["Personal_Info"]
 
 # External APIs
@@ -23,6 +23,8 @@ PHARMACY_API = os.getenv("PHARMACY_API")
 HOSPITAL_API = os.getenv("HOSPITAL_API")
 CARETAKER_API = os.getenv("CARETAKER_API")
 
+# RAG continuous embedding
+RAG_PROFILE_API = "https://huggingface.co/spaces/BinKhoaLe1812/Medical_Profile/update_user_data"
 
 # --- LLM Processor ---
 class LLMProcessor:
@@ -161,6 +163,41 @@ async def transcribe_voice(file: UploadFile = File(...)):
         return {"status": "error", "message": f"Exception: {e}"}
 
 
+# Register User
+@app.post("/register")
+async def register_user(data: dict):
+    username = data.get("username")
+    password = data.get("password")
+    if not username or not password:
+        raise HTTPException(status_code=400, detail="Username and password required")
+
+    if user_collection.find_one({"username": username}):
+        return {"status": "error", "message": "Username already exists."}
+
+    user_id = data.get("user_id") or os.urandom(6).hex()
+    user_collection.insert_one({"username": username, "password": password, "user_id": user_id})
+    return {"status": "success", "message": "User registered.", "user_id": user_id}
+
+# Login
+@app.post("/login")
+async def login_user(data: dict):
+    username = data.get("username")
+    password = data.get("password")
+    user = user_collection.find_one({"username": username, "password": password})
+    if not user:
+        return JSONResponse(status_code=401, content={"status": "error", "message": "Invalid credentials."})
+    return {"status": "success", "user_id": user.get("user_id")}
+
+# Profile API - update via RAG
+@app.post("/profile")
+async def update_profile(data: dict):
+    try:
+        # Send data to RAG profile embedding service
+        res = requests.post(RAG_PROFILE_API, json=data)
+        return res.json()
+    except Exception as e:
+        return {"status": "error", "message": f"Failed to update profile: {e}"}
+    
 # --- Serve Frontend ---
 @app.get("/")
 async def read_index():

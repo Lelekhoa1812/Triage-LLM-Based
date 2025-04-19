@@ -14,17 +14,20 @@ load_dotenv()
 
 # --- FastAPI App ---
 app = FastAPI(title="User Data Embedding & Update Service")
+# Set Hugging Face cache directory to writable location
+os.environ['TRANSFORMERS_CACHE'] = './.cache'
+os.environ['HF_HOME'] = './.cache'
 
 # --- MongoDB Setup ---
 mongo_uri = os.getenv("PROFILE_URI")
 if not mongo_uri:
     raise RuntimeError("MongoDB Profile URI must be set in environment")
 client = MongoClient(mongo_uri)
-db = client["MedicalChatbotDB"]
+db = client["user"]
 user_collection = db["Personal_Info"]
 
 # --- Embedding Model ---
-embedding_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # --- Pydantic Schema for Incoming Data ---
 class UserData(BaseModel):
@@ -45,7 +48,6 @@ class UserData(BaseModel):
     last_updated: str | None = None
 
 # --- Helpers ---
-
 def get_or_create_user(doc: UserData) -> str:
     """
     Authenticate by username/password. If user exists, ensure user_id matches.

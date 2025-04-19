@@ -1,58 +1,139 @@
-// Define API endpoints (adjust these URLs to your deployed backend endpoints)
-const PROFILE_API = "https://<your-huggingface-space-domain>/profile";  // Endpoint for profile updates
-const EMERGENCY_API = "https://<your-huggingface-space-domain>/emergency"; // Endpoint for emergency requests
+const BASE_URL = "https://huggingface.co/spaces/BinKhoaLe1812/Triage_LLM";
+const LOGIN_API = `${BASE_URL}/login`;
+const REGISTER_API = `${BASE_URL}/register`;
+const PROFILE_API = `${BASE_URL}/profile`;
+const EMERGENCY_API = `${BASE_URL}/emergency`;
 
-// Update profile event handler
-document.getElementById('profile-form').addEventListener('submit', async function(e) {
+let authState = {
+  username: null,
+  password: null,
+  user_id: null
+};
+
+// Toggle Login/Register Modal
+const loginSection = document.getElementById("loginSection");
+const registerSection = document.getElementById("registerSection");
+const toggleSection = (showLogin) => {
+  if (showLogin) {
+    loginSection.classList.remove("collapsed");
+    registerSection.classList.add("collapsed");
+  } else {
+    loginSection.classList.add("collapsed");
+    registerSection.classList.remove("collapsed");
+  }
+};
+
+document.getElementById("showRegisterBtn").addEventListener("click", () => toggleSection(false));
+document.getElementById("showLoginBtn").addEventListener("click", () => toggleSection(true));
+
+// Login
+const loginBtn = document.getElementById("loginBtn");
+loginBtn.addEventListener("click", async () => {
+  const username = document.getElementById("userName").value;
+  const password = document.getElementById("userPassword").value;
+
+  try {
+    const res = await fetch(LOGIN_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
+    const result = await res.json();
+    if (res.ok) {
+      authState = { username, password, user_id: result.user_id };
+      alert("Login successful!");
+      document.getElementById("loginRegisterModal").style.display = "none";
+    } else {
+      alert(result.message);
+    }
+  } catch (err) {
+    alert("Login failed.");
+  }
+});
+
+// Register
+const registerBtn = document.getElementById("createAccountBtn");
+registerBtn.addEventListener("click", async () => {
+  const username = document.getElementById("newUserName").value;
+  const password = document.getElementById("newUserPassword").value;
+
+  try {
+    const res = await fetch(REGISTER_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
+    const result = await res.json();
+    if (res.ok) {
+      alert("Account created. You can now login.");
+      toggleSection(true);
+    } else {
+      alert(result.message);
+    }
+  } catch (err) {
+    alert("Registration failed.");
+  }
+});
+
+// Update Medical Profile
+const profileForm = document.getElementById("profile-form");
+profileForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  
+
+  if (!authState.user_id) return alert("Please login first.");
+
   const profileData = {
-    name: document.getElementById('name').value,
-    age: document.getElementById('age').value,
-    sex: document.getElementById('sex').value,
-    blood_type: document.getElementById('blood_type').value,
-    allergies: document.getElementById('allergies').value,
-    medical_history: document.getElementById('medical_history').value,
-    active_medications: document.getElementById('active_medications').value,
-    disability: document.getElementById('disability').value,
-    home_address: document.getElementById('home_address').value,
+    username: authState.username,
+    password: authState.password,
+    user_id: authState.user_id,
+    name: document.getElementById("name").value,
+    age: parseInt(document.getElementById("age").value),
+    sex: document.getElementById("sex").value,
+    blood_type: document.getElementById("blood_type").value,
+    allergies: document.getElementById("allergies").value.split(","),
+    medical_history: document.getElementById("medical_history").value,
+    active_medications: document.getElementById("active_medications").value.split(","),
+    disability: document.getElementById("disability").value,
+    home_address: document.getElementById("home_address").value,
+    emergency_contact: { name: "N/A", phone: "N/A" },
+    last_updated: new Date().toISOString()
   };
 
-  // Call API to update profile in MongoDB
   try {
     const res = await fetch(PROFILE_API, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(profileData)
     });
     const result = await res.json();
-    alert(result.message || "Profile updated successfully!");
+    alert(result.message || "Profile updated.");
   } catch (err) {
     alert("Error updating profile.");
   }
 });
 
-// Emergency request handler
-document.getElementById('emergency-button').addEventListener('click', async function() {
-  // Use a simulated voice input via prompt
-  const voiceText = prompt("Simulated voice input (enter your emergency message):");
+// Emergency Trigger
+const emergencyButton = document.getElementById("emergency-button");
+emergencyButton.addEventListener("click", async () => {
+  if (!authState.user_id) return alert("Please login first.");
+  const voiceText = prompt("Enter your emergency message:");
   if (!voiceText) return;
-  
+
   const emergencyData = {
-    user_id: "sample_user_id",  // Replace with actual user ID in production
-    emergency_type: "ambulance",  // Options: "self-care", "caretaker", "ambulance"
-    voice_message: voiceText
+    user_id: authState.user_id,
+    emergency_type: "ambulance",
+    voice_text: voiceText
   };
-  
+
   try {
     const res = await fetch(EMERGENCY_API, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(emergencyData)
     });
     const result = await res.json();
-    document.getElementById('voice-output').innerText = result.message;
+    document.getElementById("voice-output").innerText = result.message;
   } catch (err) {
-    document.getElementById('voice-output').innerText = "Error processing emergency request.";
+    document.getElementById("voice-output").innerText = "Error processing emergency request.";
   }
 });
