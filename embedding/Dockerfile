@@ -17,7 +17,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # 5. Copy app code
 COPY rag.py .
-COPY .env .   # your environment variables file
 
 # 6. Expose HF Spaces default port
 EXPOSE 7860
