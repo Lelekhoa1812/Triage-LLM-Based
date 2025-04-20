@@ -1,23 +1,31 @@
 FROM python:3.11-slim
 
 # Set environment variables (may need to change authority)
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
 # Create working directory (and authorised token)
-ARG HF_TOKEN
-ENV HF_TOKEN=${HF_TOKEN}
 WORKDIR /app
 
-# Copy and install dependencies
-COPY requirements.txt /app/
-RUN pip install --upgrade pip && pip install -r requirements.txt
+# Install SSL root certs and system deps required by pymongo + DNS
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates curl dnsutils gcc openssl && \
+    rm -rf /var/lib/apt/lists/*
 
-# Copy source code
-COPY . /app
+# Copy and install dependencies
+COPY requirements.txt .
+RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
+
+# ENV to inject secret and debug
+ENV HF_TOKEN=${HF_TOKEN}
+RUN echo "✅ HF_TOKEN length: $(echo $HF_TOKEN | wc -c)"
+
+# Copy source code (app files)
+COPY . .
+RUN ls -R /app
 
 # Expose the port used by Uvicorn
 EXPOSE 7860
 
 # Run the FastAPI application using Uvicorn
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860", "--workers", "1", "--log-level", "debug"]

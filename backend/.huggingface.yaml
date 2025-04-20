@@ -1,5 +1,6 @@
 title: "Triage LLM App"
 sdk: docker
 port: 7860
-secrets:
-  - HF_TOKEN
+
+build-secrets:
+  HF_TOKEN: HF_TOKEN

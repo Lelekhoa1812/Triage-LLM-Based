@@ -1,7 +1,6 @@
 # Server
 fastapi
 uvicorn[standard]
-huggingface_hub
 
 # UI (optional)
 aiofiles
@@ -10,8 +9,14 @@ aiofiles
 pymongo
 requests
 
+# LLM
+google-genai
+
 # API
 python-dotenv
 
 # Utilities
 python-multipart
+huggingface_hub
+psutil              # CPU/RAM logger
+

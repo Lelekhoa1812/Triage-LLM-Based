@@ -1,16 +1,43 @@
+# Access site: https://binkhoale1812-triage-llm.hf.space/
 import os
 import requests
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import uvicorn
 
+# Check permission (Authorized key)
+print(f"[DEBUG] HF_TOKEN loaded?: {'HF_TOKEN' in os.environ and bool(os.getenv('HF_TOKEN'))}")
+
+# Enable Logging for Debugging
+import logging
+# Set up app-specific logger
+logger = logging.getLogger("triage-response")
+logger.setLevel(logging.INFO)  # Set to DEBUG only when needed
+# Set log format
+formatter = logging.Formatter("[%(levelname)s] %(asctime)s - %(message)s")
+handler = logging.StreamHandler()
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+# Suppress noisy libraries like pymongo, urllib3, etc.
+for noisy in ["pymongo", "urllib3", "httpx", "uvicorn", "uvicorn.error", "uvicorn.access"]:
+    logging.getLogger(noisy).setLevel(logging.WARNING)
+
 # Load environment variables
 load_dotenv()
 
+# FastAPI initialization
 app = FastAPI(title="Emergency Response System")
+# CORS (allow frontend in same Space and DB connection - anywhere)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # MongoDB connection
 mongo_uri = os.getenv("PROFILE_URI")
@@ -22,41 +49,74 @@ user_collection = db["Personal_Info"]
 PHARMACY_API = os.getenv("PHARMACY_API")
 HOSPITAL_API = os.getenv("HOSPITAL_API")
 CARETAKER_API = os.getenv("CARETAKER_API")
+# RAG continuous embedding (wrapped in /predict endpoint to troubleshoot HF Space connection problem)
+RAG_PROFILE_API = "https://binkhoale1812-medical-profile.hf.space/predict"
 
-# RAG continuous embedding
-RAG_PROFILE_API = "https://huggingface.co/spaces/BinKhoaLe1812/Medical_Profile/update_user_data"
+# Validate critical env vars
+required_env = ["PROFILE_URI", "GEMINI_API_KEY", "HF_TOKEN"]
+for var in required_env:
+    if not os.getenv(var):
+        logger.error(f"Missing required environment variable: {var}")
+        raise RuntimeError(f"Environment variable {var} not set.")
+required_sv = ["PHARMACY_API", "HOSPITAL_API", "CARETAKER_API"]
+for var in required_sv:
+    if not os.getenv(var):
+        logger.error(f"Missing required service variable: {var}")
+        raise RuntimeError(f"Service variable {var} not set.")
+    
+# Monitor Resources Before Startup
+import psutil
+def check_system_resources():
+    memory = psutil.virtual_memory()
+    cpu = psutil.cpu_percent(interval=1)
+    disk = psutil.disk_usage("/")
+    # Defines log info messages
+    logger.info(f"🔍 System Resources - RAM: {memory.percent}%, CPU: {cpu}%, Disk: {disk.percent}%")
+    if memory.percent > 85:
+        logger.warning("⚠️ High RAM usage detected!")
+    if cpu > 90:
+        logger.warning("⚠️ High CPU usage detected!")
+    if disk.percent > 90:
+        logger.warning("⚠️ High Disk usage detected!")
+check_system_resources()
 
-# --- LLM Processor ---
+# --- Serve Static Frontend ---
+@app.get("/")
+async def read_index():
+    index_path = "statics/index.html"
+    if os.path.exists(index_path):
+        logger.info("[STATIC] Serving index.html")
+        return FileResponse(index_path)
+    else:
+        logger.error("[STATIC] index.html not found")
+        return JSONResponse(status_code=404, content={"message": "index.html not found"})
+# Mount app
+app.mount("/statics", StaticFiles(directory="statics"), name="statics")
+
+# --- LLM Processor (using Gemini via google-genai client) ---
+from google import genai
 class LLMProcessor:
     def __init__(self):
         self.api_key = os.getenv("GEMINI_API_KEY")
-        self.base_url = "https://gemini-api.example.com/v1/generate"
+        self.model_name = "gemini-2.0-flash"
 
     def generate_response(self, prompt: str) -> str:
-        print("[LLM] Generating response...")
+        logger.info("[LLM] Generating response...")
         if not self.api_key:
-            print("[LLM] Missing API Key. Defaulting to 'caretaker'")
+            logger.warning("[LLM] Missing API Key. Defaulting to 'caretaker'")
             return "caretaker"
-
         try:
-            headers = {
-                "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json"
-            }
-            payload = {"prompt": prompt, "max_tokens": 100}
-            response = requests.post(self.base_url, headers=headers, json=payload)
-            print(f"[LLM] Status Code: {response.status_code}")
-            print(f"[LLM] Raw Response: {response.text}")
-            if response.status_code == 200:
-                return response.json().get("response", "No response")
-            return f"LLM Error: {response.status_code} - {response.text}"
+            client = genai.Client(api_key=self.api_key)
+            resp = client.generate(self.model_name, contents=prompt)
+            text = resp[0].generated_text if isinstance(resp, list) else resp.generated_text
+            logger.debug(f"[LLM] Response: {text}")
+            return text
         except Exception as e:
-            print(f"[LLM] Exception: {e}")
+            logger.error(f"[LLM] Exception: {e}")
             return f"LLM Exception: {e}"
-
-
 llm_processor = LLMProcessor()
 
+# TODO: Find actual triage dataset
 def rag_context(user_data: dict) -> str:
     print("[RAG] Retrieving user context from FAISS (mocked)...")
     return "Retrieved triage guidelines: [Example1, Example2, Example3]"
@@ -75,6 +135,7 @@ async def handle_emergency(data: dict):
 
         user = user_collection.find_one({"user_id": user_id})
         if not user:
+            logger.warning("[EMERGENCY] User not found in database")
             print("[EMERGENCY] User not found in database")
             return JSONResponse(status_code=404, content={"status": "error", "message": "User not found"})
 
@@ -96,7 +157,7 @@ async def handle_emergency(data: dict):
         context = rag_context(user_summary)
         prompt = (
             f"Patient details: {user_summary}. \n"
-            f"Additional context: {context}\n"
+            # f"Additional context: {context}\n" # TODO: On next update, please use a proper triage dataset for guideline
             f"Emergency type: {emergency_type}. \n"
             f"Based on the above, determine the best emergency response "
             f"(options: 'self-care' [drone medication], 'caretaker', 'ambulance')."
@@ -144,13 +205,15 @@ async def handle_emergency(data: dict):
 # --- Voice-to-Text Endpoint ---
 @app.post("/voice-transcribe")
 async def transcribe_voice(file: UploadFile = File(...)):
-    try:
+    try: # TODO: Currently handling simulated text-based request on website, however mobile app already has voice built-in
         audio_data = await file.read()
         hf_api_url = "https://api-inference.huggingface.co/models/facebook/wav2vec2-base-960h"
-        headers = {"Authorization": f"Bearer {os.getenv('HF_API_KEY')}"}
+        headers = {"Authorization": f"Bearer {os.getenv('HF_TOKEN')}"}
 
+        logger.info("[VOICE] Sending audio to Hugging Face API...")
         print("[VOICE] Sending audio to Hugging Face API...")
         response = requests.post(hf_api_url, headers=headers, data=audio_data)
+        logger.info(f"[VOICE] Status code: {response.status_code}, body: {response.text}")
         print(f"[VOICE] Status code: {response.status_code}, body: {response.text}")
 
         if response.status_code == 200:
@@ -159,10 +222,12 @@ async def transcribe_voice(file: UploadFile = File(...)):
 
         return {"status": "error", "message": "Transcription failed"}
     except Exception as e:
+        logger.error(f"[VOICE] Transcription error: {e}")
         print(f"[VOICE] Transcription error: {e}")
         return {"status": "error", "message": f"Exception: {e}"}
 
 
+# --- User Auth & Profile Integration Endpoints ---
 # Register User
 @app.post("/register")
 async def register_user(data: dict):
@@ -174,8 +239,9 @@ async def register_user(data: dict):
     if user_collection.find_one({"username": username}):
         return {"status": "error", "message": "Username already exists."}
 
-    user_id = data.get("user_id") or os.urandom(6).hex()
+    user_id = data.get("user_id") or os.urandom(6).hex() # user_id consist of 6 random hex
     user_collection.insert_one({"username": username, "password": password, "user_id": user_id})
+    logger.info(f"Registration with account {username} id: {user_id}")
     return {"status": "success", "message": "User registered.", "user_id": user_id}
 
 # Login
@@ -193,20 +259,12 @@ async def login_user(data: dict):
 async def update_profile(data: dict):
     try:
         # Send data to RAG profile embedding service
-        res = requests.post(RAG_PROFILE_API, json=data)
+        headers = {"Content-Type": "application/json"}
+        res = requests.post(RAG_PROFILE_API, json=data, headers=headers, timeout=30)
+        logger.info(f"[PROFILE] RAG API responded with {res.status_code}: {res.text}")
         return res.json()
     except Exception as e:
         return {"status": "error", "message": f"Failed to update profile: {e}"}
-    
-# --- Serve Frontend ---
-@app.get("/")
-async def read_index():
-    index_path = "statics/index.html"
-    if os.path.exists(index_path):
-        return FileResponse(index_path)
-    return JSONResponse(status_code=404, content={"message": "index.html not found"})
-
-app.mount("/statics", StaticFiles(directory="statics"), name="statics")
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=7860, log_level="debug")

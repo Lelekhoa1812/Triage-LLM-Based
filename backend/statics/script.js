@@ -1,4 +1,4 @@
-const BASE_URL = "https://huggingface.co/spaces/BinKhoaLe1812/Triage_LLM";
+const BASE_URL = "https://binkhoale1812-triage-llm.hf.space"; // Correct format
 const LOGIN_API = `${BASE_URL}/login`;
 const REGISTER_API = `${BASE_URL}/register`;
 const PROFILE_API = `${BASE_URL}/profile`;
