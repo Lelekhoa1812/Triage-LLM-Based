@@ -14,6 +14,14 @@ load_dotenv()
 
 # --- FastAPI App ---
 app = FastAPI(title="User Data Embedding & Update Service")
+# Allow CORS bypass
+from fastapi.middleware.cors import CORSMiddleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 # Set Hugging Face cache directory to writable location
 os.environ['TRANSFORMERS_CACHE'] = './.cache'
 os.environ['HF_HOME'] = './.cache'
@@ -151,6 +159,24 @@ async def update_user_data(data: UserData):
     print(f"✅ MongoDB profile snapshot updated for {data.username}")
 
     return {"status": "success", "message": f"User {data.username} data embedded."}
+
+
+'''
+=> Expose RAG as a specific POST /predict endpoint
+This is since Hugging Face does not expose raw FastAPI endpoints (/update_user_data) to external callers in other Spaces unless:
+- Serve app as an inference Space 
+- Wrap the endpoint in an api/predict 
+- Wrap the app in Gradio interface
+'''
+from fastapi import APIRouter
+from model import UserData
+@app.post("/predict")
+async def predict_route(data: UserData):
+    return await update_user_data(data)
+# @app.post("/predict")
+# async def predict_route(payload: dict):
+#     data = UserData(**payload)
+#     return await update_user_data(data)
 
 # --- Launch ---
 if __name__ == "__main__":
