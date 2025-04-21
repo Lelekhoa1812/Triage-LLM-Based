@@ -4,6 +4,10 @@ FROM python:3.11-slim
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
+# ENV to inject secret
+ARG HF_TOKEN
+ENV HF_TOKEN=${HF_TOKEN}
+
 # Create working directory (and authorised token)
 WORKDIR /app
 
@@ -16,8 +20,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
-# ENV to inject secret and debug
-ENV HF_TOKEN=${HF_TOKEN}
+# Debug make sure token exist
 RUN echo "✅ HF_TOKEN length: $(echo $HF_TOKEN | wc -c)"
 
 # Copy source code (app files)

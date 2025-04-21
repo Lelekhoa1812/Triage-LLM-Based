@@ -12,7 +12,6 @@ function formatProfile(user) {
   return `
     <ul>
       <li><strong>Name:</strong> ${user.Name}</li>
-      <li><strong>Blood Type:</strong> ${user["Blood Type"]}</li>
       <li><strong>Allergies:</strong> ${user.Allergies}</li>
       <li><strong>Medical History:</strong> ${user["Medical History"]}</li>
       <li><strong>Current Medication:</strong> ${user["Current Medication"]}</li>
@@ -28,7 +27,13 @@ function pollDispatch() {
       return res.json();
     })
     .then(data => {
-      document.getElementById("log").innerText = `💊 Medicine Supply Drone dispatched. \nMedication need: "${data.medications || 'N/A'}"`;
+      const meds = Array.isArray(data.medications) && data.medications.length > 0
+      ? data.medications.join(", ")
+      : "N/A";
+    
+    document.getElementById("log").innerText =
+      `💊 Medicine Supply Drone dispatched.\nMedication needed: ${meds}`;
+    profileElement.innerHTML = formatProfile(data.user);
     })
     .catch(err => {
       document.getElementById("log").innerText = "❌ Error dispatching drone: " + err;

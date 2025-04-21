@@ -10,7 +10,8 @@ from dotenv import load_dotenv
 import uvicorn
 
 # Check permission (Authorized key)
-print(f"[DEBUG] HF_TOKEN loaded?: {'HF_TOKEN' in os.environ and bool(os.getenv('HF_TOKEN'))}")
+token = os.getenv("HF_TOKEN")
+print(f"[DEBUG] HF_TOKEN = {token[:5]}... ({'set' if token else 'NOT set'})")
 
 # Enable Logging for Debugging
 import logging
@@ -185,10 +186,10 @@ async def handle_emergency(data: dict):
             f"Symptoms reported by the patient: \"{voice_input}\"\n"
             # f"Additional context: {context}\n" # TODO: On next update, please use a proper triage dataset for guideline
             f"With contextual awareness, select 1 (or more) appropriate emergency response(s) from the list of triage response options. \n"
-            f"Options:\n - Drone medication with self-care (when medication is needed and user can take medication by themselves) \n - Drone medication and a caretaker (when medication is needed and user cannot take medication by themselves) \n - Caretaker only \n - Ambulance \n"
+            f"Options:\n - Drone \n - Caretaker \n - Ambulance \n"
             f"If medication is needed, also list the exact medication names required for dispatch. "
-            f"Respond in a short JSON format like:\n"
-                f"{{ \"response\": \"drone medication, self-care\", \"medications\": [\"Paracetamol\", \"Omeprazole\"] }}"
+            f"Respond in a short JSON format, with comma splitting selection, for instance:\n"
+                f"{{ \"response\": [\"Drone\", \"Self-care\"], \"medications\": [\"Paracetamol\", \"Omeprazole\"] }}"
         )
         '''
           Routing API services accordingly to LLM decision,
@@ -204,7 +205,11 @@ async def handle_emergency(data: dict):
         else:
             response_type = llm_decision_raw  # fallback
             meds = []
-        response_type = response_type.lower() # Normalize
+        # Normalize responses (list or string)
+        if isinstance(response_type, list):
+            response_type = [r.lower() for r in response_type]
+        else:
+            response_type = response_type.lower()  # fallback     
         # Pharmacy route
         if ("self-care" in response_type) or ("drone" in response_type) or ("medication" in response_type):
             try:

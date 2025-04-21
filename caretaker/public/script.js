@@ -32,6 +32,7 @@ function pollDispatch() {
     })
     .then(data => {
       document.getElementById("log").innerText = `🧑 Caretaker on the way. \nUser request: "${data.message || 'N/A'}"`;
+      profileElement.innerHTML = formatProfile(data.user);
     })
     .catch(err => {
       document.getElementById("log").innerText = "❌ Error sending caretaker: " + err;
