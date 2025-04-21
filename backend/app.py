@@ -95,8 +95,9 @@ async def read_index():
 # Mount app
 app.mount("/statics", StaticFiles(directory="statics"), name="statics")
 
-# --- LLM Processor (using Gemini via google-genai client) ---
+# --- LLM Processor (using Gemini Flash 2.0 via google-genai client) ---
 from google import genai
+from google.genai import types
 class LLMProcessor:
     def __init__(self):
         self.api_key = os.getenv("GEMINI_API_KEY")
@@ -108,14 +109,12 @@ class LLMProcessor:
             logger.warning("[LLM] Missing API Key. Defaulting to 'caretaker'")
             return "caretaker"
         try:
-            # client = genai.Client(api_key=self.api_key)
-            # resp = client.models.generate_content(self.model_name, contents=prompt)
-            # text = resp[0].generated_text if isinstance(resp, list) else resp.generated_text
-            # logger.debug(f"[LLM] Response: {text}")
-            # return text
-            genai.configure(api_key=self.api_key)
-            model = genai.GenerativeModel(model_name=self.model_name)
-            response = model.generate_content(prompt)
+            client = genai.Client(api_key=self.api_key)
+            # Generate response
+            response = client.models.generate_content(
+                model=self.model_name,
+                contents=prompt
+            )
             return response.text
         except Exception as e:
             logger.error(f"[LLM] Exception: {e}")
@@ -167,8 +166,9 @@ async def handle_emergency(data: dict):
             f"Patient details: {user_summary}. \n"
             # f"Additional context: {context}\n" # TODO: On next update, please use a proper triage dataset for guideline
             f"Emergency type: {emergency_type}. \n"
-            f"Based on the above, determine the best emergency response with contextual awareness. There could be more than 1 response."
-            f"(options: 'drone medication', 'caretaker', 'ambulance')."
+            f"With contextual awareness, select 1 (or more) option(s) from the list of these triage responses that most suit the situation. \n"
+            f"Options: 'drone medication', 'caretaker' or 'self-care, and 'ambulance'. \n"
+            f"Notice: Please answer in short"
         )
         # Make decision using LLM
         llm_decision = llm_processor.generate_response(prompt)
