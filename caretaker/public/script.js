@@ -31,7 +31,7 @@ function pollDispatch() {
       return res.json();
     })
     .then(data => {
-      document.getElementById("log").innerText = "🧑 Caretaker on the way.";
+      document.getElementById("log").innerText = `🧑 Caretaker on the way. \nUser request: "${data.message || 'N/A'}"`;
     })
     .catch(err => {
       document.getElementById("log").innerText = "❌ Error sending caretaker: " + err;

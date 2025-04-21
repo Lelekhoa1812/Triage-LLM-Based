@@ -32,7 +32,7 @@ function pollDispatch() {
     })
     .then(data => {
       if (data) {
-        logElement.innerText = "🚑 Ambulance dispatched";
+        logElement.innerText = `🚑 Ambulance dispatched. \nUser request: "${data.message || 'N/A'}"`;
         profileElement.innerHTML = formatProfile(data.user);
       }
     })

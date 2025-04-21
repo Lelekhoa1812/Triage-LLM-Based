@@ -3,7 +3,7 @@ let latestDispatch = null;
 
 export default function handler(req, res) {
   if (req.method === 'POST') {
-    const { action, status, user } = req.body;
+    const { action, status, user, message } = req.body;
 
     latestDispatch = {
       received: true,
@@ -11,6 +11,7 @@ export default function handler(req, res) {
       action,
       status,
       user,
+      message,
       timestamp: new Date().toISOString()
     };
 

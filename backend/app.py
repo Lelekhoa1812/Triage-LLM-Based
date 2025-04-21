@@ -90,7 +90,7 @@ async def read_index():
         logger.info("[STATIC] Serving index.html")
         return FileResponse(index_path)
     else:
-        logger.error("[STATIC] index.html not found")
+        logger.error("[STATIC_ERROR] index.html not found")
         return JSONResponse(status_code=404, content={"message": "index.html not found"})
 # Mount app
 app.mount("/statics", StaticFiles(directory="statics"), name="statics")
@@ -106,7 +106,7 @@ class LLMProcessor:
     def generate_response(self, prompt: str) -> str:
         logger.info("[LLM] Generating response...")
         if not self.api_key:
-            logger.warning("[LLM] Missing API Key. Defaulting to 'caretaker'")
+            logger.warning("[LLM_WARNING] Missing API Key. Defaulting to 'caretaker'")
             return "caretaker"
         try:
             client = genai.Client(api_key=self.api_key)
@@ -117,7 +117,7 @@ class LLMProcessor:
             )
             return response.text
         except Exception as e:
-            logger.error(f"[LLM] Exception: {e}")
+            logger.error(f"[LLM_ERROR] Exception: {e}")
             return f"LLM Exception: {e}"
 llm_processor = LLMProcessor()
 
@@ -126,27 +126,45 @@ def rag_context(user_data: dict) -> str:
     print("[RAG] Retrieving user context from FAISS (mocked)...")
     return "Retrieved triage guidelines: [Example1, Example2, Example3]"
 
-
+# Extract JSON from LLM response
+import json
+import re
+def extract_json(text: str):
+    try:
+        # Clean markdown-style code block
+        clean = re.sub(r"```(?:json)?", "", text, flags=re.IGNORECASE).strip("` \n")
+        return json.loads(clean)
+    except Exception as e:
+        logger.error(f"[PARSE_ERROR] Failed to parse LLM response: {e}")
+        return None
+    
+    
 # --- Emergency Endpoint ---
 @app.post("/emergency")
 async def handle_emergency(data: dict):
     try:
         print("[EMERGENCY] Request received")
         user_id = data.get("user_id")
-        emergency_type = data.get("emergency_type")
+        # emergency_type = # TODO: This will be finalized on a proper triage dataset
         voice_input = data.get("voice_text")
         # Log request
-        print(f"[EMERGENCY] user_id: {user_id}, emergency_type: {emergency_type}, voice_text: {voice_input}")
+        print(f"[EMERGENCY_INFO] user_id: {user_id}, voice_text: {voice_input}")
         # Attempt to find existing user_id
         user = user_collection.find_one({"user_id": user_id})
         if not user:
-            logger.warning("[EMERGENCY] User not found in database")
-            print("[EMERGENCY] User not found in database")
+            logger.warning("[WARNING] User not found in database")
             return JSONResponse(status_code=404, content={"status": "error", "message": "User not found"})
         # Extract profile using user_id
         profile = user.get("profile", {}) 
         if not any(profile.values()):
-            logger.warning("[EMERGENCY] Profile is empty or incomplete.")
+            logger.warning("[EMERGENCY_WARNING] Profile is empty or incomplete.")
+        # Convert emergency contact (list) to string
+        contact_info = profile.get("emergency_contact")
+        if isinstance(contact_info, dict):
+            contact_str = f'{contact_info.get("name", "")} - {contact_info.get("phone", "")}'
+        else:
+            contact_str = str(contact_info)
+        # User profile summary prepared in JSON
         user_summary = {
             "Name": profile.get("name"),
             "Age": profile.get("age"),
@@ -156,57 +174,69 @@ async def handle_emergency(data: dict):
             "Medical History": profile.get("medical_history"),
             "Current Medication": profile.get("active_medications"),
             "Disability": profile.get("disability"),
-            "Emergency Contact": profile.get("emergency_contact"),
+            "Emergency Contact": contact_str,
             "Location": profile.get("home_address")
         }
         # Debug print user profile summary
-        print(f"[EMERGENCY] Retrieved user profile: {user_summary}")
+        print(f"[EMERGENCY_USER] Retrieved user profile: {user_summary}")
         context = rag_context(user_summary)
         prompt = (
             f"Patient details: {user_summary}. \n"
+            f"Symptoms reported by the patient: \"{voice_input}\"\n"
             # f"Additional context: {context}\n" # TODO: On next update, please use a proper triage dataset for guideline
-            f"Emergency type: {emergency_type}. \n"
-            f"With contextual awareness, select 1 (or more) option(s) from the list of these triage responses that most suit the situation. \n"
-            f"Options: 'drone medication', 'caretaker' or 'self-care, and 'ambulance'. \n"
-            f"Notice: Please answer in short"
+            f"With contextual awareness, select 1 (or more) appropriate emergency response(s) from the list of triage response options. \n"
+            f"Options:\n - Drone medication with self-care (when medication is needed and user can take medication by themselves) \n - Drone medication and a caretaker (when medication is needed and user cannot take medication by themselves) \n - Caretaker only \n - Ambulance \n"
+            f"If medication is needed, also list the exact medication names required for dispatch. "
+            f"Respond in a short JSON format like:\n"
+                f"{{ \"response\": \"drone medication, self-care\", \"medications\": [\"Paracetamol\", \"Omeprazole\"] }}"
         )
-        # Make decision using LLM
-        llm_decision = llm_processor.generate_response(prompt)
-        print(f"[LLM Decision] {llm_decision}")
-        # Route accordingly
+        '''
+          Routing API services accordingly to LLM decision,
+          Sending action, status, user medical profile, message, and medication along in JSON req body
+        '''
+        llm_decision_raw = llm_processor.generate_response(prompt)
+        print(f"[LLM_DECISION_RAW] {llm_decision_raw}")
+
+        parsed = extract_json(llm_decision_raw)
+        if parsed:
+            response_type = parsed.get("response", "")
+            meds = parsed.get("medications", [])
+        else:
+            response_type = llm_decision_raw  # fallback
+            meds = []
+        response_type = response_type.lower() # Normalize
         # Pharmacy route
-        if emergency_type == "self-care" or "drone" in llm_decision.lower():
+        if ("self-care" in response_type) or ("drone" in response_type) or ("medication" in response_type):
             try:
-                res = requests.post(PHARMACY_API, json={"action": "dispatch", "status": "dispatched", "user": user_summary})
+                res = requests.post(PHARMACY_API, json={"action": "dispatch", "status": "dispatched", "user": user_summary, "medications": meds })
                 print(f"[PHARMACY] Dispatch status: {res.status_code}, response: {res.text}")
                 return {"status": "success", "message": "Medication dispatched via drone."}
             except Exception as e:
                 print(f"[PHARMACY] Dispatch error: {e}")
                 return {"status": "error", "message": "Failed to dispatch medication."}
         # Caretaker route
-        if emergency_type == "caretaker" or "caretaker" in llm_decision.lower():
+        if "caretaker" in response_type:
             try:
-                res = requests.post(CARETAKER_API, json={"action": "send_caretaker", "status": "dispatched", "user": user_summary})
+                res = requests.post(CARETAKER_API, json={"action": "send_caretaker", "status": "dispatched", "user": user_summary, "message": voice_input })
                 print(f"[CARETAKER] Dispatch status: {res.status_code}, response: {res.text}")
                 return {"status": "success", "message": "Caretaker dispatched to assist user."}
             except Exception as e:
                 print(f"[CARETAKER] Dispatch error: {e}")
                 return {"status": "error", "message": "Failed to dispatch caretaker."}
         # Ambulance route
-        if emergency_type == "ambulance" or "ambulance" in llm_decision.lower():
+        if "ambulance" in response_type:
             try:
-                res = requests.post(HOSPITAL_API, json={"action": "ambulance", "status": "dispatched", "user": user_summary})
+                res = requests.post(HOSPITAL_API, json={"action": "ambulance", "status": "dispatched", "user": user_summary, "message": voice_input })
                 print(f"[HOSPITAL] Dispatch status: {res.status_code}, response: {res.text}")
                 return {"status": "success", "message": "Ambulance dispatched to user's location."}
             except Exception as e:
                 print(f"[HOSPITAL] Dispatch error: {e}")
                 return {"status": "error", "message": "Failed to dispatch ambulance."}
-
-        print("[EMERGENCY] Invalid LLM decision or unmatched emergency type")
+        # Irrelevant decision
+        print("[EMERGENCY_WARNING] Invalid LLM decision or unmatched emergency type")
         return {"status": "error", "message": "Invalid emergency type or LLM decision not clear."}
-
     except Exception as main_error:
-        print(f"[EMERGENCY] Main exception: {main_error}")
+        print(f"[EMERGENCY_ERROR] Main exception: {main_error}")
         return {"status": "error", "message": "Error processing emergency request."}
 
 
@@ -217,21 +247,18 @@ async def transcribe_voice(file: UploadFile = File(...)):
         audio_data = await file.read()
         hf_api_url = "https://api-inference.huggingface.co/models/facebook/wav2vec2-base-960h"
         headers = {"Authorization": f"Bearer {os.getenv('HF_TOKEN')}"}
-
+        # Obtain response
         logger.info("[VOICE] Sending audio to Hugging Face API...")
-        print("[VOICE] Sending audio to Hugging Face API...")
         response = requests.post(hf_api_url, headers=headers, data=audio_data)
         logger.info(f"[VOICE] Status code: {response.status_code}, body: {response.text}")
         print(f"[VOICE] Status code: {response.status_code}, body: {response.text}")
-
+        # Error 200
         if response.status_code == 200:
             transcription = response.json().get("text", "")
             return {"status": "success", "transcription": transcription}
-
         return {"status": "error", "message": "Transcription failed"}
     except Exception as e:
-        logger.error(f"[VOICE] Transcription error: {e}")
-        print(f"[VOICE] Transcription error: {e}")
+        logger.error(f"[VOICE_ERROR] Transcription error: {e}")
         return {"status": "error", "message": f"Exception: {e}"}
 
 
@@ -243,10 +270,10 @@ async def register_user(data: dict):
     password = data.get("password")
     if not username or not password:
         raise HTTPException(status_code=400, detail="Username and password required")
-
+    # Find matching credential
     if user_collection.find_one({"username": username}):
         return {"status": "error", "message": "Username already exists."}
-
+    # New user get new id
     user_id = data.get("user_id") or os.urandom(6).hex() # user_id consist of 6 random hex
     user_collection.insert_one({"username": username, "password": password, "user_id": user_id})
     logger.info(f"Registration with account {username} id: {user_id}")
@@ -272,6 +299,7 @@ async def update_profile(data: dict):
         logger.info(f"[PROFILE] RAG API responded with {res.status_code}: {res.text}")
         return res.json()
     except Exception as e:
+        logger.error(f"[PROFILE_ERROR] {e}")
         return {"status": "error", "message": f"Failed to update profile: {e}"}
 
 if __name__ == "__main__":

@@ -28,7 +28,7 @@ function pollDispatch() {
       return res.json();
     })
     .then(data => {
-      document.getElementById("log").innerText = "💊 Medicine Supply Drone dispatched";
+      document.getElementById("log").innerText = `💊 Medicine Supply Drone dispatched. \nMedication need: "${data.medications || 'N/A'}"`;
     })
     .catch(err => {
       document.getElementById("log").innerText = "❌ Error dispatching drone: " + err;
