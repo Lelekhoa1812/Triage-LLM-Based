@@ -108,11 +108,15 @@ class LLMProcessor:
             logger.warning("[LLM] Missing API Key. Defaulting to 'caretaker'")
             return "caretaker"
         try:
-            client = genai.Client(api_key=self.api_key)
-            resp = client.generate(self.model_name, contents=prompt)
-            text = resp[0].generated_text if isinstance(resp, list) else resp.generated_text
-            logger.debug(f"[LLM] Response: {text}")
-            return text
+            # client = genai.Client(api_key=self.api_key)
+            # resp = client.models.generate_content(self.model_name, contents=prompt)
+            # text = resp[0].generated_text if isinstance(resp, list) else resp.generated_text
+            # logger.debug(f"[LLM] Response: {text}")
+            # return text
+            genai.configure(api_key=self.api_key)
+            model = genai.GenerativeModel(model_name=self.model_name)
+            response = model.generate_content(prompt)
+            return response.text
         except Exception as e:
             logger.error(f"[LLM] Exception: {e}")
             return f"LLM Exception: {e}"
@@ -132,43 +136,45 @@ async def handle_emergency(data: dict):
         user_id = data.get("user_id")
         emergency_type = data.get("emergency_type")
         voice_input = data.get("voice_text")
-
+        # Log request
         print(f"[EMERGENCY] user_id: {user_id}, emergency_type: {emergency_type}, voice_text: {voice_input}")
-
+        # Attempt to find existing user_id
         user = user_collection.find_one({"user_id": user_id})
         if not user:
             logger.warning("[EMERGENCY] User not found in database")
             print("[EMERGENCY] User not found in database")
             return JSONResponse(status_code=404, content={"status": "error", "message": "User not found"})
-
+        # Extract profile using user_id
+        profile = user.get("profile", {}) 
+        if not any(profile.values()):
+            logger.warning("[EMERGENCY] Profile is empty or incomplete.")
         user_summary = {
-            "Name": user.get("name"),
-            "Age": user.get("age"),
-            "Sex": user.get("sex"),
-            "Blood Type": user.get("blood_type"),
-            "Allergies": user.get("allergies"),
-            "Medical History": user.get("medical_history"),
-            "Current Medication": user.get("active_medications"),
-            "Disability": user.get("disability"),
-            "Emergency Contact": user.get("emergency_contact"),
-            "Location": user.get("home_address")
+            "Name": profile.get("name"),
+            "Age": profile.get("age"),
+            "Sex": profile.get("sex"),
+            "Blood Type": profile.get("blood_type"),
+            "Allergies": profile.get("allergies"),
+            "Medical History": profile.get("medical_history"),
+            "Current Medication": profile.get("active_medications"),
+            "Disability": profile.get("disability"),
+            "Emergency Contact": profile.get("emergency_contact"),
+            "Location": profile.get("home_address")
         }
-
+        # Debug print user profile summary
         print(f"[EMERGENCY] Retrieved user profile: {user_summary}")
-
         context = rag_context(user_summary)
         prompt = (
             f"Patient details: {user_summary}. \n"
             # f"Additional context: {context}\n" # TODO: On next update, please use a proper triage dataset for guideline
             f"Emergency type: {emergency_type}. \n"
-            f"Based on the above, determine the best emergency response "
-            f"(options: 'self-care' [drone medication], 'caretaker', 'ambulance')."
+            f"Based on the above, determine the best emergency response with contextual awareness. There could be more than 1 response."
+            f"(options: 'drone medication', 'caretaker', 'ambulance')."
         )
-
+        # Make decision using LLM
         llm_decision = llm_processor.generate_response(prompt)
         print(f"[LLM Decision] {llm_decision}")
-
         # Route accordingly
+        # Pharmacy route
         if emergency_type == "self-care" or "drone" in llm_decision.lower():
             try:
                 res = requests.post(PHARMACY_API, json={"action": "dispatch", "status": "dispatched", "user": user_summary})
@@ -177,8 +183,8 @@ async def handle_emergency(data: dict):
             except Exception as e:
                 print(f"[PHARMACY] Dispatch error: {e}")
                 return {"status": "error", "message": "Failed to dispatch medication."}
-
-        elif emergency_type == "caretaker" or "caretaker" in llm_decision.lower():
+        # Caretaker route
+        if emergency_type == "caretaker" or "caretaker" in llm_decision.lower():
             try:
                 res = requests.post(CARETAKER_API, json={"action": "send_caretaker", "status": "dispatched", "user": user_summary})
                 print(f"[CARETAKER] Dispatch status: {res.status_code}, response: {res.text}")
@@ -186,8 +192,8 @@ async def handle_emergency(data: dict):
             except Exception as e:
                 print(f"[CARETAKER] Dispatch error: {e}")
                 return {"status": "error", "message": "Failed to dispatch caretaker."}
-
-        elif emergency_type == "ambulance" or "ambulance" in llm_decision.lower():
+        # Ambulance route
+        if emergency_type == "ambulance" or "ambulance" in llm_decision.lower():
             try:
                 res = requests.post(HOSPITAL_API, json={"action": "ambulance", "status": "dispatched", "user": user_summary})
                 print(f"[HOSPITAL] Dispatch status: {res.status_code}, response: {res.text}")
