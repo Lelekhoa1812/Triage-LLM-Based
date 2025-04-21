@@ -3,10 +3,11 @@ import uuid
 import faiss
 import numpy as np
 import uvicorn
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from fastapi import FastAPI, HTTPException, APIRouter, Body
 from pymongo import MongoClient
 from sentence_transformers import SentenceTransformer
+from typing import Union
+from model import UserData
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -25,6 +26,8 @@ app.add_middleware(
 # Set Hugging Face cache directory to writable location
 os.environ['TRANSFORMERS_CACHE'] = './.cache'
 os.environ['HF_HOME'] = './.cache'
+FAISS_DIR = "./.cache/faiss_indexes"
+os.makedirs(FAISS_DIR, exist_ok=True)
 
 # --- MongoDB Setup ---
 mongo_uri = os.getenv("PROFILE_URI")
@@ -37,24 +40,6 @@ user_collection = db["Personal_Info"]
 # --- Embedding Model ---
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
-# --- Pydantic Schema for Incoming Data ---
-class UserData(BaseModel):
-    username: str
-    password: str
-    user_id: str = None               # optional if new user; will be generated
-    name: str
-    age: int
-    sex: str
-    blood_type: str
-    allergies: list[str]
-    medical_history: str
-    active_medications: list[str]
-    disability: str
-    home_address: str
-    emergency_contact: dict
-    embedded_profile: str | None = None
-    last_updated: str | None = None
-
 # --- Helpers ---
 def get_or_create_user(doc: UserData) -> str:
     """
@@ -66,20 +51,32 @@ def get_or_create_user(doc: UserData) -> str:
         "username": doc.username,
         "password": doc.password
     })
-
+    print(f"[DEBUG] Found existing user: {existing}") # Comment in for simplicity
+    # Fetch FAISS file for existing user or create new
     if existing:
-        # existing user – return their faiss file
-        return existing["faiss_file"]
-
-    # new user: assign user_id if not provided
+        if "faiss_file" in existing:
+            return os.path.join(FAISS_DIR, existing["faiss_file"])
+        # existing user_id without faiss_file
+        else:
+            # Auto-fix: generate and add a faiss_file
+            user_id = existing.get("user_id") or doc.user_id or str(uuid.uuid4())
+            faiss_file_name = f"{user_id}_index.faiss"
+            user_collection.update_one(
+                {"_id": existing["_id"]},
+                {"$set": {"faiss_file": faiss_file_name}}
+            )
+            print(f"⚠️ Added missing faiss_file for existing user: {doc.username}")
+            return os.path.join(FAISS_DIR, faiss_file_name)
+    # New user: assign user_id if not provided
     user_id = doc.user_id or str(uuid.uuid4())
-    faiss_file = f"{user_id}_index.faiss"
+    faiss_file_name = f"{user_id}_index.faiss"
+    faiss_file_path = os.path.join(FAISS_DIR, faiss_file_name)
 
     user_collection.insert_one({
         "username": doc.username,
         "password": doc.password,
         "user_id": user_id,
-        "faiss_file": faiss_file,
+        "faiss_file": faiss_file_name,
         # store initial profile snapshot
         "profile": {
             "name": doc.name,
@@ -97,7 +94,7 @@ def get_or_create_user(doc: UserData) -> str:
         }
     })
     print(f"✅ Created new user: {doc.username} ({user_id})")
-    return faiss_file
+    return faiss_file_path
 
 # --- API Endpoint ---
 @app.post("/update_user_data")
@@ -132,6 +129,7 @@ async def update_user_data(data: UserData):
 
     # 5) Add new vector
     index.add(embedding)
+    os.makedirs(os.path.dirname(faiss_file), exist_ok=True) # Ensure exist path upon refresh
     faiss.write_index(index, faiss_file)
     print(f"✅ Updated FAISS index for {data.username} → {faiss_file}")
 
@@ -168,15 +166,23 @@ This is since Hugging Face does not expose raw FastAPI endpoints (/update_user_d
 - Wrap the endpoint in an api/predict 
 - Wrap the app in Gradio interface
 '''
-from fastapi import APIRouter
-from model import UserData
 @app.post("/predict")
 async def predict_route(data: UserData):
+    print("[DEBUG] Received /predict payload:", data.dict())
     return await update_user_data(data)
-# @app.post("/predict")
-# async def predict_route(payload: dict):
-#     data = UserData(**payload)
-#     return await update_user_data(data)
+
+# Upon Frontend startup, RAG server is expected to automatically fetch and send profile data of existing user
+@app.post("/get_profile")
+async def get_user_profile(credentials: dict = Body(...)):
+    username = credentials.get("username")
+    password = credentials.get("password")
+    # Find matched credential
+    user = user_collection.find_one({"username": username, "password": password})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found or incorrect credentials")
+    # Append corresponding profile
+    profile = user.get("profile", {})
+    return {"status": "success", "profile": profile}
 
 # --- Launch ---
 if __name__ == "__main__":

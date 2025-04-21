@@ -50,7 +50,9 @@ PHARMACY_API = os.getenv("PHARMACY_API")
 HOSPITAL_API = os.getenv("HOSPITAL_API")
 CARETAKER_API = os.getenv("CARETAKER_API")
 # RAG continuous embedding (wrapped in /predict endpoint to troubleshoot HF Space connection problem)
-RAG_PROFILE_API = "https://binkhoale1812-medical-profile.hf.space/predict"
+PREFIX_RAG_API = "https://binkhoale1812-medical-profile.hf.space/"
+PROFILE_API = os.path.join(PREFIX_RAG_API, "predict")
+LOADER_API = os.path.join(PREFIX_RAG_API, "get_profile")
 
 # Validate critical env vars
 required_env = ["PROFILE_URI", "GEMINI_API_KEY", "HF_TOKEN"]
@@ -260,7 +262,7 @@ async def update_profile(data: dict):
     try:
         # Send data to RAG profile embedding service
         headers = {"Content-Type": "application/json"}
-        res = requests.post(RAG_PROFILE_API, json=data, headers=headers, timeout=30)
+        res = requests.post(PROFILE_API, json=data, headers=headers, timeout=30)
         logger.info(f"[PROFILE] RAG API responded with {res.status_code}: {res.text}")
         return res.json()
     except Exception as e:

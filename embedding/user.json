@@ -10,7 +10,7 @@
     "disability": "None",
     "home_address": "123 Main St, Melbourne, VIC",
     "emergency_contact": { "name": "Jane Doe", "phone": "0400 123 456" },
-    "embedded_profile": "<vector_data>",  // optional field for pre-embedded context
+    "embedded_profile": "<vector_data>",  
     "last_updated": "2025-04-10T14:30:00Z"
   }
   

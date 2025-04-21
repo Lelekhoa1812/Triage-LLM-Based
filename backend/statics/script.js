@@ -1,4 +1,4 @@
-const BASE_URL = "https://binkhoale1812-triage-llm.hf.space"; // Correct format
+const BASE_URL = "https://binkhoale1812-triage-llm.hf.space";
 const LOGIN_API = `${BASE_URL}/login`;
 const REGISTER_API = `${BASE_URL}/register`;
 const PROFILE_API = `${BASE_URL}/profile`;
@@ -10,25 +10,30 @@ let authState = {
   user_id: null
 };
 
-// Toggle Login/Register Modal
+// --- Load saved auth state from localStorage ---
+document.addEventListener("DOMContentLoaded", async () => {
+  const saved = localStorage.getItem("authState");
+  if (saved) {
+    authState = JSON.parse(saved);
+    document.getElementById("loginRegisterModal").style.display = "none";
+    await loadUserProfile(); // Load and fill form
+  }
+});
+
+// --- Toggle Login/Register Modal ---
 const loginSection = document.getElementById("loginSection");
 const registerSection = document.getElementById("registerSection");
+
 const toggleSection = (showLogin) => {
-  if (showLogin) {
-    loginSection.classList.remove("collapsed");
-    registerSection.classList.add("collapsed");
-  } else {
-    loginSection.classList.add("collapsed");
-    registerSection.classList.remove("collapsed");
-  }
+  loginSection.classList.toggle("collapsed", !showLogin);
+  registerSection.classList.toggle("collapsed", showLogin);
 };
 
 document.getElementById("showRegisterBtn").addEventListener("click", () => toggleSection(false));
 document.getElementById("showLoginBtn").addEventListener("click", () => toggleSection(true));
 
-// Login
-const loginBtn = document.getElementById("loginBtn");
-loginBtn.addEventListener("click", async () => {
+// --- Login ---
+document.getElementById("loginBtn").addEventListener("click", async () => {
   const username = document.getElementById("userName").value;
   const password = document.getElementById("userPassword").value;
 
@@ -41,8 +46,10 @@ loginBtn.addEventListener("click", async () => {
     const result = await res.json();
     if (res.ok) {
       authState = { username, password, user_id: result.user_id };
+      localStorage.setItem("authState", JSON.stringify(authState));
       alert("Login successful!");
       document.getElementById("loginRegisterModal").style.display = "none";
+      await loadUserProfile();
     } else {
       alert(result.message);
     }
@@ -51,9 +58,8 @@ loginBtn.addEventListener("click", async () => {
   }
 });
 
-// Register
-const registerBtn = document.getElementById("createAccountBtn");
-registerBtn.addEventListener("click", async () => {
+// --- Register ---
+document.getElementById("createAccountBtn").addEventListener("click", async () => {
   const username = document.getElementById("newUserName").value;
   const password = document.getElementById("newUserPassword").value;
 
@@ -75,11 +81,9 @@ registerBtn.addEventListener("click", async () => {
   }
 });
 
-// Update Medical Profile
-const profileForm = document.getElementById("profile-form");
-profileForm.addEventListener("submit", async (e) => {
+// --- Profile Submission ---
+document.getElementById("profile-form").addEventListener("submit", async (e) => {
   e.preventDefault();
-
   if (!authState.user_id) return alert("Please login first.");
 
   const profileData = {
@@ -90,12 +94,15 @@ profileForm.addEventListener("submit", async (e) => {
     age: parseInt(document.getElementById("age").value),
     sex: document.getElementById("sex").value,
     blood_type: document.getElementById("blood_type").value,
-    allergies: document.getElementById("allergies").value.split(","),
-    medical_history: document.getElementById("medical_history").value,
-    active_medications: document.getElementById("active_medications").value.split(","),
+    allergies: document.getElementById("allergies").value.split(",").map(x => x.trim()),
+    medical_history: document.getElementById("medical_history").value.split(",").map(x => x.trim()),
+    active_medications: document.getElementById("active_medications").value.split(",").map(x => x.trim()),
     disability: document.getElementById("disability").value,
     home_address: document.getElementById("home_address").value,
-    emergency_contact: { name: "N/A", phone: "N/A" },
+    emergency_contact: {
+      name: document.getElementById("emergency_name").value || "N/A",
+      phone: document.getElementById("emergency_phone").value || "N/A"
+    },    
     last_updated: new Date().toISOString()
   };
 
@@ -112,9 +119,8 @@ profileForm.addEventListener("submit", async (e) => {
   }
 });
 
-// Emergency Trigger
-const emergencyButton = document.getElementById("emergency-button");
-emergencyButton.addEventListener("click", async () => {
+// --- Emergency Trigger ---
+document.getElementById("emergency-button").addEventListener("click", async () => {
   if (!authState.user_id) return alert("Please login first.");
   const voiceText = prompt("Enter your emergency message:");
   if (!voiceText) return;
@@ -137,3 +143,48 @@ emergencyButton.addEventListener("click", async () => {
     document.getElementById("voice-output").innerText = "Error processing emergency request.";
   }
 });
+
+// --- Auto-Fill Profile ---
+async function loadUserProfile() {
+  try {
+    const res = await fetch("https://binkhoale1812-medical-profile.hf.space/get_profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: authState.username,
+        password: authState.password
+      })
+    });
+
+    const result = await res.json();
+    if (res.ok && result.status === "success") {
+      const profile = result.profile;
+
+      // Pre-fill the fields
+      document.getElementById("name").value = profile.name || "";
+      document.getElementById("age").value = profile.age || "";
+      document.getElementById("sex").value = profile.sex || "";
+      document.getElementById("blood_type").value = profile.blood_type || "";
+      document.getElementById("allergies").value = (profile.allergies || []).join(", ");
+      document.getElementById("medical_history").value = (profile.medical_history || []).join(", ");
+      document.getElementById("active_medications").value = (profile.active_medications || []).join(", ");
+      document.getElementById("disability").value = profile.disability || "";
+      document.getElementById("home_address").value = profile.home_address || "";
+      document.getElementById("emergency_name").value = profile.emergency_contact?.name || "";
+      document.getElementById("emergency_phone").value = profile.emergency_contact?.phone || "";
+    }
+  } catch (err) {
+    console.warn("❌ Failed to load profile on page load.");
+  }
+}
+
+// --- Logout ---
+const logoutBtn = document.getElementById("logout-button");
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", () => {
+    localStorage.removeItem("authState");
+    authState = { username: null, password: null, user_id: null };
+    alert("Logged out.");
+    location.reload();
+  });
+}
