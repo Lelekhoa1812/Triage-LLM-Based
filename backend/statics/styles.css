@@ -163,3 +163,27 @@ fieldset label {
 .modal-button:hover {
   background-color: rgb(48, 41, 65);
 }
+
+/** Emergency audio transcribe **/
+#voice-output {
+  font-family: 'Courier New', monospace;
+  font-size: 18px;
+  color: #0052cc;
+  margin-top: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  border-right: 3px solid #333;
+}
+#voice-output.typing {
+  white-space: nowrap;
+  overflow: hidden;
+  border-right: 3px solid #333;
+  animation: typing 2.5s steps(30, end), blink 0.75s step-end infinite;
+}
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+@keyframes blink {
+  50% { border-color: transparent; }
+}

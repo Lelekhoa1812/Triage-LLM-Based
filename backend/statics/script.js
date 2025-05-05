@@ -4,6 +4,7 @@ const REGISTER_API = `${BASE_URL}/register`;
 const PROFILE_API = `${BASE_URL}/profile`;
 const EMERGENCY_API = `${BASE_URL}/emergency`;
 
+// Init authState null at default
 let authState = {
   username: null,
   password: null,
@@ -23,12 +24,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 // --- Toggle Login/Register Modal ---
 const loginSection = document.getElementById("loginSection");
 const registerSection = document.getElementById("registerSection");
-
+// Toggle state
 const toggleSection = (showLogin) => {
   loginSection.classList.toggle("collapsed", !showLogin);
   registerSection.classList.toggle("collapsed", showLogin);
 };
-
+// Determine current state and toggle
 document.getElementById("showRegisterBtn").addEventListener("click", () => toggleSection(false));
 document.getElementById("showLoginBtn").addEventListener("click", () => toggleSection(true));
 
@@ -36,7 +37,7 @@ document.getElementById("showLoginBtn").addEventListener("click", () => toggleSe
 document.getElementById("loginBtn").addEventListener("click", async () => {
   const username = document.getElementById("userName").value;
   const password = document.getElementById("userPassword").value;
-
+  // Send username and password for authentication
   try {
     const res = await fetch(LOGIN_API, {
       method: "POST",
@@ -62,7 +63,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
 document.getElementById("createAccountBtn").addEventListener("click", async () => {
   const username = document.getElementById("newUserName").value;
   const password = document.getElementById("newUserPassword").value;
-
+  // Send register information of username and password to DB
   try {
     const res = await fetch(REGISTER_API, {
       method: "POST",
@@ -85,7 +86,7 @@ document.getElementById("createAccountBtn").addEventListener("click", async () =
 document.getElementById("profile-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   if (!authState.user_id) return alert("Please login first.");
-
+  // Prepare profile JSON 
   const profileData = {
     username: authState.username,
     password: authState.password,
@@ -105,7 +106,7 @@ document.getElementById("profile-form").addEventListener("submit", async (e) => 
     },    
     last_updated: new Date().toISOString()
   };
-
+  // Fetch profile back to refresh
   try {
     const res = await fetch(PROFILE_API, {
       method: "POST",
@@ -119,30 +120,111 @@ document.getElementById("profile-form").addEventListener("submit", async (e) => 
   }
 });
 
-// --- Emergency Trigger ---
-document.getElementById("emergency-button").addEventListener("click", async () => {
-  if (!authState.user_id) return alert("Please login first.");
-  const voiceText = prompt("Enter your emergency message:");
-  if (!voiceText) return;
-
-  const emergencyData = {
-    user_id: authState.user_id,
-    emergency_type: "ambulance",
-    voice_text: voiceText
-  };
-
-  try {
-    const res = await fetch(EMERGENCY_API, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(emergencyData)
+// --- Emergency Trigger (Voice-Based) ---
+// Media recording
+let mediaRecorder;
+let audioChunks = [];
+// Btn triggers
+const emergencyButton = document.getElementById("emergency-button");
+const voiceOutput = document.getElementById("voice-output");
+// Typing animation
+let typingInterval; // Global reference
+function typeEffect(element, text, delay = 50) { // Typing each 50ms
+  if (typingInterval) clearInterval(typingInterval);
+  element.classList.add("typing");
+  element.innerText = "";
+  let i = 0;
+  typingInterval = setInterval(() => {
+    element.innerText += text.charAt(i);
+    i++;
+    if (i >= text.length) {
+      clearInterval(typingInterval);
+      element.classList.remove("typing");
+      typingInterval = null;
+    }
+  }, delay);
+}
+// Get audio record
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(stream => {
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.ondataavailable = e => {
+        audioChunks.push(e.data);
+      };
+      // Stop media
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+        audioChunks = [];
+        // Form and write audio file
+        const formData = new FormData();
+        formData.append("file", audioBlob, "recording.wav");
+        try {
+          // Indicate sending audio...
+          typeEffect(voiceOutput, "🧠 Transcribing your voice...", 40);
+          const res = await fetch(`${BASE_URL}/voice-transcribe`, {
+            method: "POST",
+            body: formData
+          });
+          // Result from trancribe
+          const result = await res.json();
+          const transcribedText = result.transcription || "❌ Unable to transcribe.";
+          // Show voice transcription with typing effect
+          typeEffect(voiceOutput, `🗣 ${transcribedText}`, 30);
+          // Only send to backend if valid auth and transcription
+          if (authState.user_id) {
+            const emergencyData = {
+              user_id: authState.user_id,
+              emergency_type: "ambulance",
+              voice_text: transcribedText
+            };
+            // Delay emergency call slightly to let user see transcription
+            setTimeout(async () => {
+              typeEffect(voiceOutput, `🗣 ${transcribedText}\n⏳ Sending emergency request...`, 30);
+              // Send to correct service API
+              const emRes = await fetch(EMERGENCY_API, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(emergencyData)
+              });
+              // Obtain result
+              const emResult = await emRes.json();
+              // Spec timeout event
+              setTimeout(() => {
+                typeEffect(
+                  voiceOutput,
+                  `🗣 ${transcribedText}\n🚨 ${emResult.message || "Response received."}`,
+                  25
+                );
+              }, 300);
+            }, 600);
+          }
+        } catch (err) {
+          typeEffect(voiceOutput, "❌ Error processing voice emergency.");
+        }
+      };
+      // START RECORDING EVENTS
+      const startRecording = () => {
+        voiceOutput.innerText = "🎙 Recording... Hold to speak...";
+        mediaRecorder.start();
+      };
+      const stopRecording = () => {
+        mediaRecorder.stop();
+      };
+      // MOUSE EVENTS
+      emergencyButton.addEventListener("mousedown", startRecording);
+      emergencyButton.addEventListener("mouseup", stopRecording);
+      // TOUCH EVENTS (Mobile)
+      emergencyButton.addEventListener("touchstart", startRecording);
+      emergencyButton.addEventListener("touchend", stopRecording);
+    })
+    .catch(err => {
+      console.error("Microphone access denied or failed.", err);
+      alert("Microphone access is required for emergency voice recognition.");
     });
-    const result = await res.json();
-    document.getElementById("voice-output").innerText = result.message;
-  } catch (err) {
-    document.getElementById("voice-output").innerText = "Error processing emergency request.";
-  }
-});
+} else {
+  alert("getUserMedia not supported on this browser.");
+}
 
 // --- Auto-Fill Profile ---
 async function loadUserProfile() {
@@ -155,11 +237,10 @@ async function loadUserProfile() {
         password: authState.password
       })
     });
-
+    // saved credential data in localStorage matches db data => allow auto-login
     const result = await res.json();
     if (res.ok && result.status === "success") {
       const profile = result.profile;
-
       // Pre-fill the fields
       document.getElementById("name").value = profile.name || "";
       document.getElementById("age").value = profile.age || "";

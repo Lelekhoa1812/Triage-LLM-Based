@@ -2,7 +2,7 @@
 fastapi
 uvicorn[standard]
 
-# UI (optional)
+# UI 
 aiofiles
 
 # Database
@@ -18,5 +18,9 @@ python-dotenv
 # Utilities
 python-multipart
 huggingface_hub
-psutil              # CPU/RAM logger
+psutil              
 
+# ASR
+pydub
+torch
+transformers
