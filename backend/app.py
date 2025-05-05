@@ -183,9 +183,9 @@ async def handle_emergency(payload: Dict):
         prompt = (
             "You are an AI assistant supporting medical staff. "
             "Summarize the patient's critical info and suggest best-practice actions "
-            "for triage (do not decide autonomously).\n\n"
+            "for triage practitioner with full context-awareness (do not decide autonomously).\n\n"
             f"PATIENT INFO:\n{summary}\n\n"
-            f"RAG CONTEXT:\n{context}\n\n"
+            f"RESPONSE GUIDELINE:\n{context}\n\n"
             f"EMERGENCY ASSERTION:\n\"{voice}\"\n\n"
             "Return a JSON object with keys:\n"
             "  \"highlights\": [<key bullet points>],\n"
@@ -236,7 +236,7 @@ async def voice_transcribe(file: UploadFile = File(...)):
     return {"status":"success","transcription":text}
 
 # ──────────────────────────────────────────────────────────────────────────────
-# 4) Auth & Profile RAG Endpoints
+# 4) Auth & Profile Endpoints
 # ──────────────────────────────────────────────────────────────────────────────
 @app.post("/register")
 async def register(data: Dict):

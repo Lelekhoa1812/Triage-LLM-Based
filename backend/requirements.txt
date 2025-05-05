@@ -24,3 +24,5 @@ psutil
 pydub
 torch
 transformers
+accelerate
+ffmpeg-python
