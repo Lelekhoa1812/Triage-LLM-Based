@@ -47,17 +47,27 @@ function createCard(d) {
   // Header block
   const header = document.createElement('div');
   header.className = 'card-header';
-  // Left sections (name, age, address)
-  const left = document.createElement('div');
-  left.className = 'left';
-  left.innerHTML = `
-    <h2>${d.profile.Name} <small>(${d.profile.Age} years old)</small></h2>
-    <small>${d.profile.Location}</small>
+  // Top row with name and age
+  const topRow = document.createElement('div');
+  topRow.className = 'top-row';
+  topRow.innerHTML = `
+    <h2>${d.profile.Name}</h2>
+    <small>${d.profile.Age} years old</small>
   `;
-  // Severity dropdown button
+  // Address row
+  const address = document.createElement('div');
+  address.className = 'address';
+  address.textContent = d.profile.Location;
+  // Action row
+  const actionRow = document.createElement('div');
+  actionRow.className = 'action-row';
+  // Severity dropdown
+  const labelledSelect = document.createElement('div');
+  labelledSelect.className = 'labelled';
+  labelledSelect.innerHTML = '<span>Severity</span>';
   const select = document.createElement('select');
   select.innerHTML = `
-    <option value="">Severity</option>
+    <option value="">Unlabelled</option>
     <option value="High">High</option>
     <option value="Medium">Medium</option>
     <option value="Low">Low</option>
@@ -66,10 +76,11 @@ function createCard(d) {
     updateUrgency(card, e.target.value);
     sortCards();
   });
-  // Button group
-  const buttonGroup = document.createElement('div');
-  buttonGroup.className = 'button-group';
-  // Toggle details block hidden-shown state
+  labelledSelect.appendChild(select);
+  // Toggle details button
+  const labelledDetails = document.createElement('div');
+  labelledDetails.className = 'labelled';
+  labelledDetails.innerHTML = '<span>Toggle</span>';
   const detailsBtn = document.createElement('button');
   detailsBtn.textContent = 'Details';
   detailsBtn.addEventListener('click', () => {
@@ -77,24 +88,23 @@ function createCard(d) {
     details.style.display = open ? 'none' : 'block';
     detailsBtn.textContent = open ? 'Details' : 'Hide';
   });
-  // Trigger hide on Archive btn
+  labelledDetails.appendChild(detailsBtn);
+  // Archive button
+  const labelledArchive = document.createElement('div');
+  labelledArchive.className = 'labelled';
+  labelledArchive.innerHTML = '<span>Archive</span>';
   const archiveBtn = document.createElement('button');
   archiveBtn.textContent = 'Archive';
   archiveBtn.addEventListener('click', () => archiveCard(d.id, card));
-  // Toast notification notify archive state
-  const label1 = document.createElement('div');
-  label1.className = 'label';
-  label1.textContent = 'Toggle';
-  const label2 = document.createElement('div');
-  label2.className = 'label';
-  label2.textContent = 'Archive';
-  // Style binding
-  buttonGroup.append(label1, detailsBtn, label2, archiveBtn);
-  header.append(left, select, buttonGroup);
-  // Render
+  labelledArchive.appendChild(archiveBtn);
+  // Append items
+  actionRow.append(labelledSelect, labelledDetails, labelledArchive);
+  // Details
   const details = document.createElement('div');
   details.className = 'details';
   details.innerHTML = renderDetails(d);
+  // Compose all
+  header.append(topRow, address, actionRow);
   card.append(header, details);
   return card;
 }

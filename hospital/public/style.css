@@ -1,12 +1,14 @@
 body {
-  background: #f8fafa;
+  background: #f4f7fa;
   padding: 20px;
   font-family: 'Segoe UI', sans-serif;
 }
+
 .container {
   max-width: 900px;
   margin: auto;
 }
+
 h1 {
   margin-bottom: 25px;
   color: #004d40;
@@ -26,9 +28,11 @@ h1 {
   transition: opacity 0.3s ease;
   z-index: 1000;
 }
+
 .toast.show {
   opacity: 1;
 }
+
 .toast button {
   background: none;
   border: none;
@@ -38,102 +42,170 @@ h1 {
   margin-left: 12px;
 }
 
-/* Dispatch Card */
+/* Card base */
 .dispatch-card {
-  border: 1px solid #cfd8dc;
+  border: 1px solid #dbe4ea;
   border-radius: 10px;
   margin-bottom: 20px;
   background: #ffffff;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
   transition: background 0.3s ease;
   overflow: hidden;
+  padding: 18px 22px;
 }
+
+/* Header layout */
 .card-header {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Top row with name + age */
+.card-header .top-row {
+  display: flex;
   justify-content: space-between;
-  gap: 15px;
-  padding: 15px 20px;
-  flex-wrap: wrap;
+  align-items: baseline;
 }
-.card-header .left {
-  flex: 2;
-}
-.card-header .left h2 {
+
+.card-header .top-row h2 {
   margin: 0;
   font-size: 1.2em;
   color: #263238;
 }
-.card-header .left small {
-  display: block;
-  margin-top: 4px;
-  color: #78909c;
+
+.card-header .top-row small {
+  color: #607d8b;
   font-size: 0.9em;
+  margin-left: 10px;
 }
 
-/* Dropdown */
-.card-header select {
-  padding: 6px 10px;
-  border-radius: 6px;
-  border: 1px solid #b0bec5;
-  background: #eceff1;
-  font-weight: bold;
-  transition: all 0.2s ease;
-}
-.card-header select:focus {
-  outline: none;
-  background: #ffffff;
-  border-color: #0288d1;
+/* Address */
+.card-header .address {
+  color: #607d8b;
+  font-size: 0.95em;
+  margin-top: 2px;
 }
 
-/* Buttons */
-.card-header .button-group {
+/* Action row */
+.card-header .action-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+/* Labels above buttons */
+.labelled {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-}
-.card-header button {
-  padding: 6px 14px;
-  border-radius: 6px;
-  border: none;
-  background: #0288d1;
-  color: white;
-  font-weight: 500;
-  cursor: pointer;
-  transition: transform 0.2s ease, background 0.3s ease;
-}
-.card-header button:hover {
-  background: #0277bd;
-  transform: translateY(-1px);
-}
-.card-header .label {
-  font-size: 0.8em;
+  font-size: 0.75em;
   color: #455a64;
 }
 
-/* Detail Section */
-.details {
-  padding: 20px;
-  background: #ffffff;
-  display: none;
-  border-top: 1px solid #eceff1;
+/* Buttons */
+.card-header button,
+.card-header select {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #007bc1;
+  color: #ffffff;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
 }
+
+.card-header button:hover {
+  background: #005f91;
+  transform: translateY(-1px);
+}
+
+/* Dropdown select */
+.card-header select {
+  background: #ffffff;
+  color: #000;
+  border: 1px solid #ccc;
+  font-weight: bold;
+  min-width: 90px;
+  padding: 6px 12px;
+}
+
+/* Expanded details */
+.details {
+  padding: 16px 6px 4px 6px;
+  background: #fefefe;
+  border-top: 1px solid #e0e0e0;
+  display: none;
+}
+
 .details h3 {
-  margin-top: 20px;
+  margin-top: 16px;
   font-size: 1.05em;
   color: #263238;
 }
+
 .details ul {
   padding-left: 20px;
   margin: 6px 0 16px;
   color: #37474f;
 }
+
 .details li {
   margin: 3px 0;
 }
 
-/* Urgency colouring */
-.urgency-high   { background: #ffebee; }   /* red */
-.urgency-medium { background: #fff8e1; }   /* yellow */
-.urgency-low    { background: #e8f5e9; }   /* green */
+/* Urgency classes */
+.urgency-high {
+  background: #ffebee;
+}
+
+.urgency-medium {
+  background: #fffde7;
+}
+
+.urgency-low {
+  background: #e8f5e9;
+}
+
+
+/* Responsive Layout Adjustments */
+@media (max-width: 768px) {
+  .card-header .top-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .card-header .action-row {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .card-header select,
+  .card-header button {
+    font-size: 0.9em;
+  }
+
+  .labelled {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 450px) {
+  .card-header .action-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .card-header select,
+  .card-header button {
+    width: 100%;
+  }
+
+  .labelled {
+    width: 100%;
+  }
+}
