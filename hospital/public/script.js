@@ -43,20 +43,21 @@ function createCard(d) {
   const card = document.createElement('div');
   card.className = 'dispatch-card';
   card.dataset.id = d.id;
-  card.dataset.urgency = '';   // unlabeled
-  /* ---------- header ---------- */
+  card.dataset.urgency = '';
+  // Header block
   const header = document.createElement('div');
   header.className = 'card-header';
-
-  /*  left – patient summary  */
+  // Left sections (name, age, address)
   const left = document.createElement('div');
   left.className = 'left';
-  left.textContent = `${d.profile.Name} — ${d.profile.Age} yrs — ${d.profile.Location}`;
-
-  /*  middle – urgency select  */
+  left.innerHTML = `
+    <h2>${d.profile.Name} <small>(${d.profile.Age} years old)</small></h2>
+    <small>${d.profile.Location}</small>
+  `;
+  // Severity dropdown button
   const select = document.createElement('select');
   select.innerHTML = `
-    <option value="">Label urgency</option>
+    <option value="">Severity</option>
     <option value="High">High</option>
     <option value="Medium">Medium</option>
     <option value="Low">Low</option>
@@ -65,32 +66,39 @@ function createCard(d) {
     updateUrgency(card, e.target.value);
     sortCards();
   });
-
-  /*  toggle details button  */
+  // Button group
+  const buttonGroup = document.createElement('div');
+  buttonGroup.className = 'button-group';
+  // Toggle details block hidden-shown state
   const detailsBtn = document.createElement('button');
-  detailsBtn.textContent = 'Show Details';
+  detailsBtn.textContent = 'Details';
   detailsBtn.addEventListener('click', () => {
     const open = details.style.display === 'block';
     details.style.display = open ? 'none' : 'block';
-    detailsBtn.textContent = open ? 'Show Details' : 'Hide Details';
+    detailsBtn.textContent = open ? 'Details' : 'Hide';
   });
-
-  /*  archive button  */
+  // Trigger hide on Archive btn
   const archiveBtn = document.createElement('button');
   archiveBtn.textContent = 'Archive';
   archiveBtn.addEventListener('click', () => archiveCard(d.id, card));
-
-  header.append(left, select, detailsBtn, archiveBtn);
-
-  /* ---------- details ---------- */
+  // Toast notification notify archive state
+  const label1 = document.createElement('div');
+  label1.className = 'label';
+  label1.textContent = 'Toggle';
+  const label2 = document.createElement('div');
+  label2.className = 'label';
+  label2.textContent = 'Archive';
+  // Style binding
+  buttonGroup.append(label1, detailsBtn, label2, archiveBtn);
+  header.append(left, select, buttonGroup);
+  // Render
   const details = document.createElement('div');
   details.className = 'details';
   details.innerHTML = renderDetails(d);
-
-  /* ---------- compose ---------- */
   card.append(header, details);
   return card;
 }
+
 
 /* --------------------------------------------------------------------------
    Urgency handling + colour
