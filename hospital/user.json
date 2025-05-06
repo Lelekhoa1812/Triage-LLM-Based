@@ -1,0 +1,118 @@
+[
+  {
+    "action": "emergency",
+    "status": "active",
+    "received": true,
+    "service": "triagellmhospital.vercel.app",
+    "urgency": null,
+    "archived": false,
+    "timestamp": "2025-05-06T12:58:29.879Z",
+    "profile": {
+      "Name": "Vlad Putin",
+      "Age": 70,
+      "Blood Type": "AB+",
+      "Allergies": ["None"],
+      "History": ["Diabetes"],
+      "Meds": ["Insulin"],
+      "Disability": "None",
+      "Emergency Contact": "Xi Jin Ping - 0000 456 789",
+      "Location": "1 Red Square"
+    },
+    "highlights": [
+      "Patient Name: Vlad Putin",
+      "Age: 70 years old",
+      "Medical History: Diabetes",
+      "Current Medications: Insulin",
+      "Allergies: None",
+      "Emergency Contact: Xi Jin Ping (0000 456 789)",
+      "Self-reported emergency: 'Broken leg'"
+    ],
+    "recommendations": [
+      "Immediately assess patient's vital signs.",
+      "Perform focused assessment of the reported leg injury including inspection, palpation, and assessment of neurovascular status distal to the injury.",
+      "Assess pain level and administer pain management as per protocol, considering patient's age and history.",
+      "Given history of Diabetes and Insulin use, monitor blood glucose levels.",
+      "Immobilize the suspected fracture site.",
+      "Prepare for diagnostic imaging (e.g., X-ray).",
+      "Document all findings.",
+      "Notify appropriate medical staff."
+    ],
+    "medications": []
+  },
+  {
+    "action": "emergency",
+    "status": "active",
+    "received": true,
+    "service": "triagellmhospital.vercel.app",
+    "urgency": null,
+    "archived": false,
+    "timestamp": "2025-05-06T12:58:29.879Z",
+    "profile": {
+      "Name": "Elon Musk",
+      "Age": 53,
+      "Blood Type": "O+",
+      "Allergies": ["Penicillin"],
+      "History": ["Asthma"],
+      "Meds": ["Ventolin"],
+      "Disability": "None",
+      "Emergency Contact": "Grimes - 0000 111 222",
+      "Location": "10 Whitehouse, Washington DC"
+    },
+    "highlights": [
+      "Patient Name: Elon Musk",
+      "Age: 53 years old",
+      "Medical History: Asthma",
+      "Current Medications: Ventolin",
+      "Allergies: Penicillin",
+      "Emergency Contact: Grimes (0000 111 222)",
+      "Self-reported emergency: 'Severe chest tightness'"
+    ],
+    "recommendations": [
+      "Initiate high-flow oxygen immediately.",
+      "Monitor respiratory rate, oxygen saturation, and signs of respiratory distress.",
+      "Administer bronchodilator via nebulizer or inhaler as per asthma protocol.",
+      "Avoid Penicillin-based antibiotics due to allergy.",
+      "Alert respiratory therapist and prepare for escalation.",
+      "Document all interventions and reassess."
+    ],
+    "medications": ["Ventolin Nebules"]
+  },
+  {
+    "action": "emergency",
+    "status": "active",
+    "received": true,
+    "service": "triagellmhospital.vercel.app",
+    "urgency": null,
+    "archived": false,
+    "timestamp": "2025-05-06T12:58:29.879Z",
+    "profile": {
+      "Name": "Angela Merkel",
+      "Age": 68,
+      "Blood Type": "A-",
+      "Allergies": ["Latex"],
+      "History": ["Hypertension", "Hyperlipidemia"],
+      "Meds": ["Amlodipine", "Atorvastatin"],
+      "Disability": "None",
+      "Emergency Contact": "Ursula VDL - 0000 987 321",
+      "Location": "12 Bundeskanzleramt, Berlin"
+    },
+    "highlights": [
+      "Patient Name: Angela Merkel",
+      "Age: 68 years old",
+      "Medical History: Hypertension, Hyperlipidemia",
+      "Current Medications: Amlodipine, Atorvastatin",
+      "Allergies: Latex",
+      "Emergency Contact: Ursula VDL (0000 987 321)",
+      "Self-reported emergency: 'Headache and dizziness'"
+    ],
+    "recommendations": [
+      "Take seated blood pressure and monitor closely.",
+      "Assess for signs of stroke or cardiovascular event.",
+      "Avoid using latex gloves or equipment due to allergy.",
+      "Administer antihypertensives as per standing orders if BP is high.",
+      "Perform ECG and neurological assessment.",
+      "Prepare for imaging if symptoms persist."
+    ],
+    "medications": ["Amlodipine", "Atorvastatin"]
+  }
+]

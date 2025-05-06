@@ -15,7 +15,7 @@ h1 {
   text-align: center;
 }
 
-/* Toast */
+/** Toast **/
 .toast {
   position: fixed;
   top: 20px;
@@ -28,11 +28,9 @@ h1 {
   transition: opacity 0.3s ease;
   z-index: 1000;
 }
-
 .toast.show {
   opacity: 1;
 }
-
 .toast button {
   background: none;
   border: none;
@@ -42,7 +40,7 @@ h1 {
   margin-left: 12px;
 }
 
-/* Card base */
+/** Card base **/
 .dispatch-card {
   border: 1px solid #dbe4ea;
   border-radius: 10px;
@@ -53,158 +51,139 @@ h1 {
   overflow: hidden;
   padding: 18px 22px;
 }
-
+/* Header layout */
 /* Header layout */
 .card-header {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-/* Top row with name + age */
-.card-header .top-row {
-  display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
+  flex-wrap: wrap;
+  row-gap: 8px;
 }
-
-.card-header .top-row h2 {
+/* Name + age + address block */
+.card-header .identity-block {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.card-header .identity-line {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.card-header .identity-line h2 {
   margin: 0;
   font-size: 1.2em;
   color: #263238;
 }
-
-.card-header .top-row small {
+.card-header .identity-line .age {
   color: #607d8b;
-  font-size: 0.9em;
-  margin-left: 10px;
+  font-size: 0.95em;
 }
-
-/* Address */
 .card-header .address {
   color: #607d8b;
   font-size: 0.95em;
   margin-top: 2px;
 }
-
-/* Action row */
+/* Action buttons */
 .card-header .action-row {
   display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-top: 10px;
+  align-items: flex-end;
+  gap: 20px;
 }
-
-/* Labels above buttons */
 .labelled {
   display: flex;
   flex-direction: column;
   align-items: center;
   font-size: 0.75em;
   color: #455a64;
+  gap: 4px;
 }
-
-/* Buttons */
+/* Buttons and dropdown */
 .card-header button,
 .card-header select {
   padding: 6px 14px;
   border-radius: 6px;
   border: 1px solid #ccc;
   background: #007bc1;
-  color: #ffffff;
+  color: white;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.25s ease;
 }
-
 .card-header button:hover {
   background: #005f91;
   transform: translateY(-1px);
 }
-
-/* Dropdown select */
 .card-header select {
-  background: #ffffff;
-  color: #000;
-  border: 1px solid #ccc;
-  font-weight: bold;
-  min-width: 90px;
-  padding: 6px 12px;
+  background: white;
+  color: black;
+  min-width: 100px;
 }
 
-/* Expanded details */
+/** Expanded details **/
 .details {
   padding: 16px 6px 4px 6px;
   background: #fefefe;
   border-top: 1px solid #e0e0e0;
   display: none;
 }
-
 .details h3 {
   margin-top: 16px;
   font-size: 1.05em;
   color: #263238;
 }
-
 .details ul {
   padding-left: 20px;
   margin: 6px 0 16px;
   color: #37474f;
 }
-
 .details li {
   margin: 3px 0;
 }
 
-/* Urgency classes */
+/** Urgency classes **/
 .urgency-high {
   background: #ffebee;
 }
-
 .urgency-medium {
   background: #fffde7;
 }
-
 .urgency-low {
   background: #e8f5e9;
 }
 
 
-/* Responsive Layout Adjustments */
+/** Responsive Layout Adjustments **/
 @media (max-width: 768px) {
   .card-header .top-row {
     flex-direction: column;
     align-items: flex-start;
     gap: 4px;
   }
-
   .card-header .action-row {
     flex-wrap: wrap;
     gap: 12px;
   }
-
   .card-header select,
   .card-header button {
     font-size: 0.9em;
   }
-
   .labelled {
     align-items: flex-start;
   }
 }
-
+/* Mobile */
 @media (max-width: 450px) {
   .card-header .action-row {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
   }
-
   .card-header select,
   .card-header button {
     width: 100%;
   }
-
   .labelled {
     width: 100%;
   }

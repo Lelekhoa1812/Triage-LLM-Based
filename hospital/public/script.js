@@ -47,17 +47,22 @@ function createCard(d) {
   // Header block
   const header = document.createElement('div');
   header.className = 'card-header';
-  // Top row with name and age
-  const topRow = document.createElement('div');
-  topRow.className = 'top-row';
-  topRow.innerHTML = `
+  // Identity block
+  const identityBlock = document.createElement('div');
+  identityBlock.className = 'identity-block';
+  // Format name (age)
+  const identityLine = document.createElement('div');
+  identityLine.className = 'identity-line';
+  identityLine.innerHTML = `
     <h2>${d.profile.Name}</h2>
-    <small>${d.profile.Age} years old</small>
+    <span class="age">(${d.profile.Age} years old)</span>
   `;
-  // Address row
+  // Address
   const address = document.createElement('div');
   address.className = 'address';
   address.textContent = d.profile.Location;
+  // Append items
+  identityBlock.append(identityLine, address);
   // Action row
   const actionRow = document.createElement('div');
   actionRow.className = 'action-row';
@@ -104,7 +109,7 @@ function createCard(d) {
   details.className = 'details';
   details.innerHTML = renderDetails(d);
   // Compose all
-  header.append(topRow, address, actionRow);
+  header.append(identityBlock, actionRow);
   card.append(header, details);
   return card;
 }
