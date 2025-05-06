@@ -44,6 +44,11 @@ function createCard(d) {
   card.className = 'dispatch-card';
   card.dataset.id = d.id;
   card.dataset.urgency = '';
+  // Fallback if profile is missing
+  const profile = d.profile || {};
+  const name = profile.Name || "Unknown";
+  const age = profile.Age ? `(${profile.Age})` : "";
+  const location = profile.Location || "Location not specified";
   // Header block
   const header = document.createElement('div');
   header.className = 'card-header';
@@ -54,13 +59,13 @@ function createCard(d) {
   const identityLine = document.createElement('div');
   identityLine.className = 'identity-line';
   identityLine.innerHTML = `
-    <h2>${d.profile.Name}</h2>
-    <span class="age">(${d.profile.Age} years old)</span>
+    <h2>${name}</h2>
+    <span class="age">${age} years old</span>
   `;
   // Address
   const address = document.createElement('div');
   address.className = 'address';
-  address.textContent = d.profile.Location;
+  address.textContent = location;
   // Append items
   identityBlock.append(identityLine, address);
   // Action row

@@ -20,7 +20,7 @@
     },
     "highlights": [
       "Patient Name: Vlad Putin",
-      "Age: 70 years old",
+      "Age: 70",
       "Medical History: Diabetes",
       "Current Medications: Insulin",
       "Allergies: None",
@@ -60,7 +60,7 @@
     },
     "highlights": [
       "Patient Name: Elon Musk",
-      "Age: 53 years old",
+      "Age: 53",
       "Medical History: Asthma",
       "Current Medications: Ventolin",
       "Allergies: Penicillin",
@@ -98,7 +98,7 @@
     },
     "highlights": [
       "Patient Name: Angela Merkel",
-      "Age: 68 years old",
+      "Age: 68",
       "Medical History: Hypertension, Hyperlipidemia",
       "Current Medications: Amlodipine, Atorvastatin",
       "Allergies: Latex",
