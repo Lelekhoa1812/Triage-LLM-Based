@@ -2,17 +2,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Hospital Ambulance Dispatch</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="website icon" type="png" href="hospital.png" >
+  <link rel="stylesheet" href="style.css" />
+  <link rel="website icon" type="png" href="hospital.png" />
 </head>
 <body>
   <div class="container">
     <h1>Hospital Emergency Response</h1>
-    <div id="log"></div>
-    <div id="profile"></div>
+
+    <!-- toast notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- dynamic list of patient blocks -->
+    <div id="dispatchList" class="dispatch-list"></div>
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>

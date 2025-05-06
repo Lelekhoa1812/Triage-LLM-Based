@@ -1,28 +1,49 @@
 // api/dispatch.js
-let latestDispatch = null;
+// In‑memory queue of all incoming emergency calls
+let dispatchQueue = [];
 
 export default function handler(req, res) {
+  // ─────────────────────────────────────────────────────────
+  //  POST  ⇒  add a new dispatch item
+  // ─────────────────────────────────────────────────────────
   if (req.method === 'POST') {
-    const { action, status, user, message } = req.body;
+    const {
+      action,
+      status,
+      profile,
+      highlights,
+      recommendations,
+      medications
+    } = req.body;
 
-    latestDispatch = {
+    const item = {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
       received: true,
       service: req.headers.host,
       action,
       status,
-      user,
-      message,
+      profile,
+      highlights,
+      recommendations,
+      medications,
+      urgency: null,      // staff labelling: “High” | “Medium” | “Low”
+      archived: false,    // client‑side archive toggle
       timestamp: new Date().toISOString()
     };
 
-    console.log("🚨 Dispatch Log:", latestDispatch);
-    return res.status(200).json(latestDispatch);
+    dispatchQueue.push(item);
+    console.log('🚨 New dispatch:', item);
+    return res.status(200).json(item);
   }
 
+  // ─────────────────────────────────────────────────────────
+  //  GET  ⇒  return *all* active, non‑archived dispatches
+  // ─────────────────────────────────────────────────────────
   if (req.method === 'GET') {
-    if (!latestDispatch) return res.status(204).end(); 
-    return res.status(200).json(latestDispatch);
+    const active = dispatchQueue.filter(d => !d.archived);
+    if (active.length === 0) return res.status(204).end();
+    return res.status(200).json(active);
   }
 
-  res.status(405).json({ error: "Method Not Allowed" });
+  res.status(405).json({ error: 'Method Not Allowed' });
 }

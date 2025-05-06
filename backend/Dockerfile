@@ -1,42 +1,66 @@
 FROM python:3.11-slim
 
-# Set environment variables (may need to change authority)
+# ───────────────────────────────
+# ENV Variables
+# ───────────────────────────────
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     TRANSFORMERS_CACHE=/app/model_cache \
     HF_HOME=/app/.cache/huggingface \
     SENTENCE_TRANSFORMERS_HOME=/app/.cache/huggingface/sentence-transformers
 
-# ENV to inject secret (for HF model utilities)
 ARG HF_TOKEN
 ENV HF_TOKEN=${HF_TOKEN}
 
-# Create working directory (and authorised token)
+# ───────────────────────────────
+# Create working directory
+# ───────────────────────────────
 WORKDIR /app
 
-# Install SSL root certs and system deps required by pymongo + DNS + ASR
+# ───────────────────────────────
+# System dependencies
+# ───────────────────────────────
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates curl dnsutils gcc openssl && \
-    rm -rf /var/lib/apt/lists/*
+    ca-certificates curl dnsutils gcc openssl ffmpeg git \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy and install dependencies
+# ───────────────────────────────
+# Python dependencies
+# ───────────────────────────────
 COPY requirements.txt .
-RUN pip install --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# Prepare cache dirs (for ASR model caching)
-RUN mkdir -p /app/model_cache /app/.cache/huggingface \
- && chown -R 1000:1000 /app
+# ───────────────────────────────
+# Prepare cache directories
+# ───────────────────────────────
+ENV HF_HOME=/app/.cache/huggingface \
+    SENTENCE_TRANSFORMERS_HOME=/app/.cache/huggingface/sentence-transformers
 
-# Debug HF token existance
-RUN echo "✅ HF_TOKEN length: $(echo $HF_TOKEN | wc -c)"
+# ───────────────────────────────
+# Pre-download SentenceTransformer model
+# ───────────────────────────────
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
 
-# Copy source code (app files)
+# ───────────────────────────────
+# Create non-root user and change ownership
+# ───────────────────────────────
+RUN useradd -m -u 1000 user && \
+    mkdir -p /app/model_cache /app/.cache/huggingface/sentence-transformers && \
+    chown -R user:user /app
+USER user
+
+# ───────────────────────────────
+# Copy app source
+# ───────────────────────────────
 COPY . .
-RUN ls -R /app
 
-# Expose the port used by Uvicorn
+# Debug token access (optional)
+RUN echo '✅ HF_TOKEN set?' && echo ${HF_TOKEN} | wc -c
+
+# ───────────────────────────────
+# Expose and run
+# ───────────────────────────────
 EXPOSE 7860
 
-# Run the FastAPI application using Uvicorn (add ["--workers", "1"] parameter if resource go low)
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860", "--log-level", "debug"]

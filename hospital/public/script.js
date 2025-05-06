@@ -1,45 +1,181 @@
-// public/script.js
-const logElement = document.getElementById("log");
-const profileElement = document.getElementById("profile");
+/* File: hospital/public/script.js */
+/* --------------------------------------------------------------------------
+   DOM nodes
+--------------------------------------------------------------------------- */
+const dispatchList = document.getElementById('dispatchList');
+const toast        = document.getElementById('toast');
 
-// Clear display at first
-logElement.innerText = "Waiting for dispatch...";
-profileElement.innerHTML = "";
+/* --------------------------------------------------------------------------
+   Client‑side state
+--------------------------------------------------------------------------- */
+const localDispatches = new Map();   // id → DOM card
+let undoCache = null;                // last archived card for undo
 
-function formatProfile(user) {
-  if (!user) return "<i>No user data available.</i>";
+/* --------------------------------------------------------------------------
+   Poll backend every 5 s for new / updated dispatches
+--------------------------------------------------------------------------- */
+setInterval(pollDispatches, 5000);
+pollDispatches(); // first run immediately
+
+function pollDispatches() {
+  fetch('/api/dispatch')
+    .then(res => (res.status === 204 ? null : res.json()))
+    .then(dispatchArray => {
+      if (!dispatchArray) return;
+
+      dispatchArray.forEach(d => {
+        // ignore if card already created
+        if (!localDispatches.has(d.id)) {
+          const card = createCard(d);
+          localDispatches.set(d.id, card);
+          dispatchList.appendChild(card);
+        }
+      });
+      sortCards();
+    })
+    .catch(err => console.error('Fetch error:', err));
+}
+
+/* --------------------------------------------------------------------------
+   Card creation
+--------------------------------------------------------------------------- */
+function createCard(d) {
+  const card = document.createElement('div');
+  card.className = 'dispatch-card';
+  card.dataset.id = d.id;
+  card.dataset.urgency = '';   // unlabeled
+  /* ---------- header ---------- */
+  const header = document.createElement('div');
+  header.className = 'card-header';
+
+  /*  left – patient summary  */
+  const left = document.createElement('div');
+  left.className = 'left';
+  left.textContent = `${d.profile.Name} — ${d.profile.Age} yrs — ${d.profile.Location}`;
+
+  /*  middle – urgency select  */
+  const select = document.createElement('select');
+  select.innerHTML = `
+    <option value="">Label urgency</option>
+    <option value="High">High</option>
+    <option value="Medium">Medium</option>
+    <option value="Low">Low</option>
+  `;
+  select.addEventListener('change', e => {
+    updateUrgency(card, e.target.value);
+    sortCards();
+  });
+
+  /*  toggle details button  */
+  const detailsBtn = document.createElement('button');
+  detailsBtn.textContent = 'Show Details';
+  detailsBtn.addEventListener('click', () => {
+    const open = details.style.display === 'block';
+    details.style.display = open ? 'none' : 'block';
+    detailsBtn.textContent = open ? 'Show Details' : 'Hide Details';
+  });
+
+  /*  archive button  */
+  const archiveBtn = document.createElement('button');
+  archiveBtn.textContent = 'Archive';
+  archiveBtn.addEventListener('click', () => archiveCard(d.id, card));
+
+  header.append(left, select, detailsBtn, archiveBtn);
+
+  /* ---------- details ---------- */
+  const details = document.createElement('div');
+  details.className = 'details';
+  details.innerHTML = renderDetails(d);
+
+  /* ---------- compose ---------- */
+  card.append(header, details);
+  return card;
+}
+
+/* --------------------------------------------------------------------------
+   Urgency handling + colour
+--------------------------------------------------------------------------- */
+function updateUrgency(card, urgency) {
+  card.dataset.urgency = urgency || '';
+  card.classList.remove('urgency-high', 'urgency-medium', 'urgency-low');
+  if (urgency === 'High')   card.classList.add('urgency-high');
+  if (urgency === 'Medium') card.classList.add('urgency-medium');
+  if (urgency === 'Low')    card.classList.add('urgency-low');
+}
+
+/* --------------------------------------------------------------------------
+   Sorting: white → red → yellow → green
+--------------------------------------------------------------------------- */
+function sortCards() {
+  const order = { '': 0, High: 1, Medium: 2, Low: 3 };
+  const cards = Array.from(dispatchList.children);
+  cards.sort((a, b) => {
+    const u1 = a.dataset.urgency, u2 = b.dataset.urgency;
+    const delta = order[u1] - order[u2];
+    return delta !== 0 ? delta : (a.dataset.id < b.dataset.id ? -1 : 1);
+  });
+  cards.forEach(c => dispatchList.appendChild(c));
+}
+
+/* --------------------------------------------------------------------------
+   Archive / undo
+--------------------------------------------------------------------------- */
+function archiveCard(id, card) {
+  undoCache = { id, card, idx: Array.from(dispatchList.children).indexOf(card) };
+  card.remove();
+  showToast('Dispatch archived', undo);
+}
+function undo() {
+  if (!undoCache) return;
+  const { card, idx } = undoCache;
+  const children = Array.from(dispatchList.children);
+  if (idx >= children.length) dispatchList.appendChild(card);
+  else dispatchList.insertBefore(card, children[idx]);
+  undoCache = null;
+}
+
+/* --------------------------------------------------------------------------
+   Toast helper
+--------------------------------------------------------------------------- */
+function showToast(message, undoCb) {
+  toast.innerHTML = `${message}${undoCb ? ' <button>Undo</button>' : ''}`;
+  toast.classList.add('show');
+  if (undoCb) toast.querySelector('button').onclick = () => { undoCb(); toast.classList.remove('show'); };
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+/* --------------------------------------------------------------------------
+   Detail rendering helpers
+--------------------------------------------------------------------------- */
+function renderDetails(d) {
   return `
+    ${formatProfile(d.profile)}
+    ${formatList('📝 Emergency Highlights', d.highlights)}
+    ${formatList('📋 Recommended Actions', d.recommendations)}
+    ${formatList('💊 Suggested Medications', d.medications)}
+  `;
+}
+function formatProfile(p) {
+  if (!p) return '<i>No profile data.</i>';
+  return `
+    <h3>Patient Profile</h3>
     <ul>
-      <li><strong>Name:</strong> ${user.Name}</li>
-      <li><strong>Age:</strong> ${user.Age}</li>
-      <li><strong>Sex:</strong> ${user.Sex}</li>
-      <li><strong>Blood Type:</strong> ${user["Blood Type"]}</li>
-      <li><strong>Allergies:</strong> ${user.Allergies}</li>
-      <li><strong>Medical History:</strong> ${user["Medical History"]}</li>
-      <li><strong>Current Medication:</strong> ${user["Current Medication"]}</li>
-      <li><strong>Disability:</strong> ${user.Disability}</li>
-      <li><strong>Emergency Contact:</strong> ${user["Emergency Contact"]}</li>
-      <li><strong>Location:</strong> ${user.Location}</li>
+      <li><strong>Name:</strong> ${p.Name}</li>
+      <li><strong>Age:</strong> ${p.Age}</li>
+      <li><strong>Blood Type:</strong> ${p['Blood Type']}</li>
+      <li><strong>Allergies:</strong> ${p.Allergies}</li>
+      <li><strong>History:</strong> ${p.History}</li>
+      <li><strong>Medication:</strong> ${p.Meds}</li>
+      <li><strong>Disability:</strong> ${p.Disability}</li>
+      <li><strong>Emergency Contact:</strong> ${p['Emergency Contact']}</li>
+      <li><strong>Location:</strong> ${p.Location}</li>
     </ul>
   `;
 }
-
-function pollDispatch() {
-  fetch("/api/dispatch")
-    .then(res => {
-      if (res.status === 204) return null;
-      return res.json();
-    })
-    .then(data => {
-      if (data) {
-        logElement.innerText = `🚑 Ambulance dispatched. \nUser request: "${data.message || 'N/A'}"`;
-        profileElement.innerHTML = formatProfile(data.user);
-      }
-    })
-    .catch(err => {
-      logElement.innerText = "❌ Error fetching dispatch: " + err;
-    });
+function formatList(title, arr) {
+  if (!arr || arr.length === 0) return '';
+  return `
+    <h3>${title}</h3>
+    <ul>${arr.map(i => `<li>${i}</li>`).join('')}</ul>
+  `;
 }
-
-// Poll every 5 seconds (refresh)
-setInterval(pollDispatch, 5000);
