@@ -14,30 +14,46 @@ import {
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 
+// Current handle API from HF (FastAPI)
+const BASE_URL = 'https://binkhoale1812-triage-llm.hf.space';
+
 const LoginScreen = () => {
   const navigation = useNavigation();
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleLogin = () => {
-    if (!email || !password) {
-      setError('Please fill in all fields');
-      return;
-    }
-    setIsLoading(true);
-    setError('');
-    const dummyUser = {email: 'user@example.com', password: 'password123'};
-    setTimeout(() => {
+const handleLogin = () => {
+  if (!identifier || !password) {
+    setError('Please fill in all fields');
+    return;
+  }
+  setIsLoading(true);
+  setError('');
+  fetch(`${BASE_URL}/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      username: identifier, // could be either email or username
+      password: password,
+    }),
+  })
+    .then((res) => res.json())
+    .then((result) => {
       setIsLoading(false);
-      if (email === dummyUser.email && password === dummyUser.password) {
-        navigation.navigate('OtpVerificationScreen');
+      if (result.status === 'success') {
+        navigation.navigate('Main');
       } else {
-        setError('Invalid credentials');
+        setError(result.message || 'Invalid credentials');
       }
-    }, 1000);
-  };
+    })
+    .catch((err) => {
+      setIsLoading(false);
+      setError('Network error');
+      console.error(err);
+    });
+};
 
   const handleGoogleLogin = () => {
     setIsLoading(true);
@@ -64,11 +80,11 @@ const LoginScreen = () => {
           <View style={styles.form}>
             <TextInput
               style={[styles.input, {fontFamily: 'Inter-Regular'}]}
-              placeholder="Email"
-              keyboardType="email-address"
+              placeholder="Username or email"
+              keyboardType="identifier"
               autoCapitalize="none"
-              value={email}
-              onChangeText={setEmail}
+              value={identifier}
+              onChangeText={setIdentifier}
             />
             <TextInput
               style={[styles.input, {fontFamily: 'Inter-Regular'}]}

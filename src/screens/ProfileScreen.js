@@ -12,6 +12,9 @@ import {
 } from 'react-native';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
+// Current handle API from HF (FastAPI)
+const BASE_URL = 'https://binkhoale1812-triage-llm.hf.space';
+
 const ProfileScreen = () => {
   const [editing, setEditing] = useState(false);
   const [buttonScale] = useState(new Animated.Value(1));

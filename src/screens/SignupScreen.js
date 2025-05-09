@@ -14,6 +14,9 @@ import {
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 
+// Current handle API from HF (FastAPI)
+const BASE_URL = 'https://binkhoale1812-triage-llm.hf.space';
+
 const SignupScreen = () => {
   const navigation = useNavigation();
   const [name, setName] = useState('');
@@ -22,18 +25,39 @@ const SignupScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSignup = () => {
-    if (!name || !email || !password) {
-      setError('Please fill in all fields');
-      return;
+const handleSignup = async () => {
+  if (!name || !email || !password) {
+    setError('Please fill in all fields');
+    return;
+  }
+  setIsLoading(true);
+  setError('');
+  try {
+    const res = await fetch(`${BASE_URL}/register`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        username: name,
+        password: password,
+        user_id: '', // Handle on backend-side
+      }),
+    });
+    const result = await res.json();
+    if (res.ok && result.status === 'success') {
+      navigation.navigate('OtpVerificationScreen', {
+        user_id: result.user_id,
+        username: name,
+        password: password,
+      });
+    } else {
+      setError(result.message || 'Signup failed');
     }
-    setIsLoading(true);
-    setError('');
-    setTimeout(() => {
-      setIsLoading(false);
-      navigation.navigate('PhoneNumberScreen');
-    }, 1000);
-  };
+  } catch (err) {
+    setError('Unable to sign up. Try again later.');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleGoogleSignup = () => {
     setIsLoading(true);
