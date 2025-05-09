@@ -11,6 +11,7 @@ let authState = {
   user_id: null
 };
 
+
 // --- Load saved auth state from localStorage ---
 document.addEventListener("DOMContentLoaded", async () => {
   const saved = localStorage.getItem("authState");
@@ -20,6 +21,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadUserProfile(); // Load and fill form
   }
 });
+
 
 // --- Toggle Login/Register Modal ---
 const loginSection = document.getElementById("loginSection");
@@ -32,6 +34,7 @@ const toggleSection = (showLogin) => {
 // Determine current state and toggle
 document.getElementById("showRegisterBtn").addEventListener("click", () => toggleSection(false));
 document.getElementById("showLoginBtn").addEventListener("click", () => toggleSection(true));
+
 
 // --- Login ---
 document.getElementById("loginBtn").addEventListener("click", async () => {
@@ -59,6 +62,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   }
 });
 
+
 // --- Register ---
 document.getElementById("createAccountBtn").addEventListener("click", async () => {
   const username = document.getElementById("newUserName").value;
@@ -81,6 +85,7 @@ document.getElementById("createAccountBtn").addEventListener("click", async () =
     alert("Registration failed.");
   }
 });
+
 
 // --- Profile Submission ---
 document.getElementById("profile-form").addEventListener("submit", async (e) => {
@@ -122,6 +127,81 @@ document.getElementById("profile-form").addEventListener("submit", async (e) => 
     alert("Error updating profile.");
   }
 });
+
+
+// --- Auto-Fill Profile ---
+async function loadUserProfile() {
+  try {
+    const res = await fetch("https://binkhoale1812-medical-profile.hf.space/get_profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: authState.username,
+        password: authState.password
+      })
+    });
+    // saved credential data in localStorage matches db data => allow auto-login
+    const result = await res.json();
+    if (res.ok && result.status === "success") {
+      const profile = result.profile;    
+      // Pre-fill the fields
+      document.getElementById("name").value = profile.name || "";
+      if (profile.dob) {
+        const [y, m, d] = profile.dob.split("-");
+        document.getElementById("dob_year").value = y || "";
+        document.getElementById("dob_month").value = m || "";
+        document.getElementById("dob_day").value = d || "";
+      }  
+      document.getElementById("sex").value = profile.sex || "";
+      document.getElementById("phone_number").value = profile.phone_number || "";
+      document.getElementById("email_address").value = profile.email_address || "";
+      document.getElementById("blood_type").value = profile.blood_type || "";
+      document.getElementById("allergies").value = (profile.allergies || []).join(", ");
+      document.getElementById("medical_history").value = (profile.medical_history || []).join(", ");
+      document.getElementById("active_medications").value = (profile.active_medications || []).join(", ");
+      document.getElementById("disability").value = profile.disability || "";
+      document.getElementById("insurance_card").value = profile.insurance_card || "";
+      document.getElementById("home_address").value = profile.home_address || "";
+      document.getElementById("emergency_name").value = profile.emergency_contact?.name || "";
+      document.getElementById("emergency_phone").value = profile.emergency_contact?.phone || "";
+    }
+  } catch (err) {
+    console.warn("❌ Failed to load profile on page load.");
+  }
+}
+
+
+// --- Upload and Summarize Medical Document ---
+async function handleFileUpload(targetField) {
+  const fileInput = document.getElementById(`upload_${targetField}`);
+  const file = fileInput.files[0];
+  if (!file) return alert("Please select a file first.");
+  // Document file
+  const formData = new FormData();
+  formData.append("file", file);
+  // Send to Gemini to summarize file content
+  try {
+    const res = await fetch(`${BASE_URL}/summarize`, {
+      method: "POST",
+      body: formData
+    });
+    // Append result with date as header
+    const result = await res.json();
+    if (res.ok && result.status === "success") {
+      const today = new Date().toLocaleDateString("en-GB"); // dd/mm/yyyy
+      const newEntry = `\n${today}\n${result.summary}`;
+      const targetTextarea = document.getElementById(targetField);
+      targetTextarea.value = (targetTextarea.value.trim() + newEntry).trim();
+      alert("Summary added.");
+    } else {
+      throw new Error(result.message || "Summarisation failed.");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Upload or summarisation failed.");
+  }
+}
+
 
 // --- Emergency Trigger (Voice-Based) ---
 // Media recording
@@ -229,46 +309,6 @@ if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
   alert("getUserMedia not supported on this browser.");
 }
 
-// --- Auto-Fill Profile ---
-async function loadUserProfile() {
-  try {
-    const res = await fetch("https://binkhoale1812-medical-profile.hf.space/get_profile", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        username: authState.username,
-        password: authState.password
-      })
-    });
-    // saved credential data in localStorage matches db data => allow auto-login
-    const result = await res.json();
-    if (res.ok && result.status === "success") {
-      const profile = result.profile;    
-      // Pre-fill the fields
-      document.getElementById("name").value = profile.name || "";
-      if (profile.dob) {
-        const [y, m, d] = profile.dob.split("-");
-        document.getElementById("dob_year").value = y || "";
-        document.getElementById("dob_month").value = m || "";
-        document.getElementById("dob_day").value = d || "";
-      }  
-      document.getElementById("sex").value = profile.sex || "";
-      document.getElementById("phone_number").value = profile.phone_number || "";
-      document.getElementById("email_address").value = profile.email_address || "";
-      document.getElementById("blood_type").value = profile.blood_type || "";
-      document.getElementById("allergies").value = (profile.allergies || []).join(", ");
-      document.getElementById("medical_history").value = (profile.medical_history || []).join(", ");
-      document.getElementById("active_medications").value = (profile.active_medications || []).join(", ");
-      document.getElementById("disability").value = profile.disability || "";
-      document.getElementById("insurance_card").value = profile.insurance_card || "";
-      document.getElementById("home_address").value = profile.home_address || "";
-      document.getElementById("emergency_name").value = profile.emergency_contact?.name || "";
-      document.getElementById("emergency_phone").value = profile.emergency_contact?.phone || "";
-    }
-  } catch (err) {
-    console.warn("❌ Failed to load profile on page load.");
-  }
-}
 
 // --- Logout ---
 const logoutBtn = document.getElementById("logout-button");

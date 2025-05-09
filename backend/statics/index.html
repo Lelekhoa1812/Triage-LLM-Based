@@ -60,10 +60,28 @@
         <label>Email Address: <input type="text" id="email_address"></label>
         <label>Blood Type: <input type="text" id="blood_type"></label>
         <label>Allergies: <input type="text" id="allergies"></label>
-        <label>Medical History: <textarea id="medical_history"></textarea></label>
-        <label>Current Medications: <textarea id="active_medications"></textarea></label>
+        <label>
+          Medical History:
+          <textarea id="medical_history"></textarea>
+          <div class="upload-block">
+            <input type="file" id="upload_medical_history" accept=".pdf,.jpg,.jpeg,.png" />
+            <button type="button" class="upload-button" onclick="handleFileUpload('medical_history')">
+              📄 Upload New Document
+            </button>
+          </div>
+        </label>
+        <label>
+          Current Medications:
+          <textarea id="active_medications"></textarea>
+          <div class="upload-block">
+            <input type="file" id="upload_active_medications" accept=".pdf,.jpg,.jpeg,.png" />
+            <button type="button" class="upload-button" onclick="handleFileUpload('active_medications')">
+              📄 Upload New Document
+            </button>
+          </div>
+        </label>
         <label>Disability Condition: <input type="text" id="disability"></label>
-        <label>Insurance Card: <input type="text" id="insurance_card"></label>
+        <label>Insurance Card Number: <input type="text" id="insurance_card"></label>
         <label>Home Address: <input type="text" id="home_address" required></label>
         <fieldset>
           <legend>Emergency Contact</legend>

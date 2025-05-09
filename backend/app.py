@@ -405,10 +405,14 @@ async def summarize_doc(file: UploadFile = File(...)):
     # Read bytes + base64 encode so we can pass into Gemini prompt
     blob = await file.read()
     b64  = base64.b64encode(blob).decode()
-
+    # Create robust prompt
     prompt = (
-        "You are a medical assistant. "
-        "Summarise the following medical document in under 100 words:\n"
+        "You are a medical assistant AI. You will be provided with a document encoded in BASE64 format.\n\n"
+        "The document may be:\n"
+        "• A **Medication Prescription** — list all medications with quantity and dosage, using bullet points.\n"
+        "• A **Health Report** — summarize the content in under 100 words.\n\n"
+        "Do not add any reflection or commentary. Focus strictly on factual extraction.\n"
+        "BEGIN DOCUMENT\n"
         f"BASE64_CONTENT:{b64}"
     )
     try:

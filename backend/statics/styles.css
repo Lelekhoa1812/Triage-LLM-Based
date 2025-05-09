@@ -41,6 +41,7 @@ button:hover {
   opacity: 0.9;
 }
 
+
 /** Profile **/
 label {
   display: block;
@@ -65,7 +66,34 @@ fieldset label {
   margin-left: 10px;
   margin-bottom: 8px;
 }
-  
+.upload-block {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+.upload-button {
+  background-color: #007BFF;
+  color: white;
+  margin-left: 10px;
+  font-weight: 600;
+  border: none;
+  /* padding: 8px 14px; */
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+}
+.upload-button:hover {
+  background-color: #0056b3;
+}
+.upload-block input[type="file"] {
+  padding: 4px;
+  margin-left: 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: #f1f1f1;
+}
+
+
 /** Modal section for Credential Information **/
 /* Modal Overlay */
 .modal-overlay {
@@ -163,6 +191,7 @@ fieldset label {
 .modal-button:hover {
   background-color: rgb(48, 41, 65);
 }
+
 
 /** Emergency audio transcribe **/
 #voice-output {
