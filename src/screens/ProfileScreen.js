@@ -146,6 +146,7 @@ const ProfileScreen = () => {
         type: f.type || 'application/pdf',
         name: f.fileName || 'upload'
       });
+      // Send file to FastAPI and summarise into text-content
       try {
         const r = await fetch(`${TRIAGE_URL}/summarize`, {
           method : 'POST',
