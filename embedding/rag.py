@@ -205,7 +205,7 @@ async def get_user_profile(credentials: dict = Body(...)):
          {"email_address": username}
        ]
     })    
-    logger.info("[UPDATE] pointing to account at", user)
+    logger.info(f"[UPDATE] pointing to account at {username}, breakdown data: {username}, {password}")
     if not user:
         raise HTTPException(status_code=404, detail="User not found or incorrect credentials")
     # Append corresponding profile

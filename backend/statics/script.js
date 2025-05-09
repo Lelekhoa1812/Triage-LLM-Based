@@ -92,7 +92,7 @@ document.getElementById("profile-form").addEventListener("submit", async (e) => 
     password: authState.password,
     user_id: authState.user_id,
     name: document.getElementById("name").value,
-    dob: parseInt(document.getElementById("dob").value),
+    dob: `${document.getElementById("dob_year").value.padStart(4, '0')}-${document.getElementById("dob_month").value.padStart(2, '0')}-${document.getElementById("dob_day").value.padStart(2, '0')}`,
     sex: document.getElementById("sex").value,
     phone_number: document.getElementById("phone_number").value,
     email_address: document.getElementById("email_address").value,
@@ -243,10 +243,15 @@ async function loadUserProfile() {
     // saved credential data in localStorage matches db data => allow auto-login
     const result = await res.json();
     if (res.ok && result.status === "success") {
-      const profile = result.profile;
+      const profile = result.profile;    
       // Pre-fill the fields
       document.getElementById("name").value = profile.name || "";
-      document.getElementById("dob").value = profile.dob || "";
+      if (profile.dob) {
+        const [y, m, d] = profile.dob.split("-");
+        document.getElementById("dob_year").value = y || "";
+        document.getElementById("dob_month").value = m || "";
+        document.getElementById("dob_day").value = d || "";
+      }  
       document.getElementById("sex").value = profile.sex || "";
       document.getElementById("phone_number").value = profile.phone_number || "";
       document.getElementById("email_address").value = profile.email_address || "";

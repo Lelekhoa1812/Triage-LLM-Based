@@ -133,6 +133,16 @@ embed_model = SentenceTransformer("all-MiniLM-L6-v2")
 # ──────────────────────────────────────────────────────────────────────────────
 # Helpers
 # ──────────────────────────────────────────────────────────────────────────────
+# Convert dob in string to datetime
+from datetime import datetime, date
+def calculate_age(dob_str):
+    try:
+        birth_date = datetime.strptime(dob_str, "%Y-%m-%d").date()
+        today = date.today()
+        return today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
+    except Exception as e:
+        logger.warning(f"[DOB_PARSE] Invalid dob format: {dob_str}")
+        return "Unknown"
 # Global FAISS memory cache
 from bson import ObjectId
 import gridfs
@@ -176,7 +186,7 @@ def rag_context(user_summary: dict, voice_text: str) -> str:
             return "Failed to load context."
     # Build context text (summarized profile + voice)
     context_input = {
-        "age": user_summary.get("Age"),
+        "dob": user_summary.get("Date of Birth"),
         "allergies": user_summary.get("Allergies"),
         "medical_history": user_summary.get("History"),
         "medications": user_summary.get("Meds"),
@@ -264,7 +274,7 @@ async def handle_emergency(payload: Dict):
         # User profile summary
         summary = {
             "Name": profile.get("name"),
-            "Age": profile.get("age"),
+            "Age": calculate_age(profile.get("dob", "")), 
             "Blood Type": profile.get("blood_type"),
             "Allergies": profile.get("allergies"),
             "History": profile.get("medical_history"),

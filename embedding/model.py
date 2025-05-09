@@ -19,7 +19,6 @@ class UserData(BaseModel):
     insurance_card: str
     home_address: str
     emergency_contact: Dict[str, str]
-    embedded_profile: Optional[str] = None
     last_updated: Optional[str] = None
 
 

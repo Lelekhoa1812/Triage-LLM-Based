@@ -49,7 +49,12 @@
       <h2>My Medical Profile</h2>
       <form id="profile-form">
         <label>Name: <input type="text" id="name" required></label>
-        <label>Date of Birth: <input type="text" id="dob" required></label>
+        <label>Date of Birth:</label>
+        <div id="dob-group" style="display: flex; gap: 8px; margin-bottom: 10px;">
+          <input type="text" id="dob_day" placeholder="DD" maxlength="2" required style="width: 50px;" />
+          <input type="text" id="dob_month" placeholder="MM" maxlength="2" required style="width: 50px;" />
+          <input type="text" id="dob_year" placeholder="YYYY" maxlength="4" required style="width: 70px;" />
+        </div>
         <label>Sex: <input type="text" id="sex"></label>
         <label>Phone Number: <input type="text" id="phone_number"></label>
         <label>Email Address: <input type="text" id="email_address"></label>
