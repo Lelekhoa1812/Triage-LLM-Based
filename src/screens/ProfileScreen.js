@@ -269,8 +269,6 @@ const ProfileScreen = () => {
             </View>
           )
         ))}
-      </ScrollView>
-
         <Animated.View style={[styles.buttonContainer,{transform:[{scale:buttonScale}]}]}>
           <TouchableOpacity
             style={[styles.button, editing?styles.saveButton:styles.editButton]}

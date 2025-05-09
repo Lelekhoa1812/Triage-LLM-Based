@@ -30,33 +30,39 @@ const handleSignup = async () => {
     setError('Please fill in all fields');
     return;
   }
-  setIsLoading(true);
-  setError('');
-  try {
-    const res = await fetch(`${BASE_URL}/register`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
+  // Dummy bypass, must be in=comment
+  navigation.navigate('OtpVerificationScreen', {
+        user_id: '01nng1234',
         username: name,
         password: password,
-        user_id: '', // Handle on backend-side
-      }),
-    });
-    const result = await res.json();
-    if (res.ok && result.status === 'success') {
-      navigation.navigate('OtpVerificationScreen', {
-        user_id: result.user_id,
-        username: name,
-        password: password,
-      });
-    } else {
-      setError(result.message || 'Signup failed');
-    }
-  } catch (err) {
-    setError('Unable to sign up. Try again later.');
-  } finally {
-    setIsLoading(false);
-  }
+  });
+//  setIsLoading(true);
+//  setError('');
+//  try {
+//    const res = await fetch(`${BASE_URL}/register`, {
+//      method: 'POST',
+//      headers: {'Content-Type': 'application/json'},
+//      body: JSON.stringify({
+//        username: name,
+//        password: password,
+//        user_id: '', // Handle on backend-side
+//      }),
+//    });
+//    const result = await res.json();
+//    if (res.ok && result.status === 'success') {
+//      navigation.navigate('OtpVerificationScreen', {
+//        user_id: result.user_id,
+//        username: name,
+//        password: password,
+//      });
+//    } else {
+//      setError(result.message || 'Signup failed');
+//    }
+//  } catch (err) {
+//    setError('Unable to sign up. Try again later.');
+//  } finally {
+//    setIsLoading(false);
+//  }
 };
 
   const handleGoogleSignup = () => {

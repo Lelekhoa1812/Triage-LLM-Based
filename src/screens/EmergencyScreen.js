@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,14 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import AudioRecorderPlayer from 'react-native-audio-recorder-player';
+
+const TRIAGE_URL = 'https://binkhoale1812-triage-llm.hf.space';
+const EMERGENCY_URL = `${TRIAGE_URL}/emergency`;
+const TRANSCRIBE_URL = `${TRIAGE_URL}/voice-transcribe`;
+
+// Dummy user (replace with real auth)
+const auth = { user_id: 'abc123' };
 
 const EmergencyScreen = () => {
   const [voiceActive, setVoiceActive] = useState(false);
@@ -22,85 +30,93 @@ const EmergencyScreen = () => {
   const [statusHistory, setStatusHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [buttonScale] = useState(new Animated.Value(1));
+  const audioRecorderPlayer = useRef(new AudioRecorderPlayer()).current;
+  const [recordedPath, setRecordedPath] = useState(null);
 
-  const updateStatus = status => {
+  const updateStatus = (status) => {
     setCurrentStatus(status);
-    setStatusHistory(prev => [
+    setStatusHistory((prev) => [
       ...prev,
-      {text: status, timestamp: new Date().toLocaleTimeString()},
+      { text: status, timestamp: new Date().toLocaleTimeString() },
     ]);
   };
 
-  const handleEmergency = (type = 'manual') => {
+  const handleEmergency = async (voiceText = '') => {
     setEmergencyActivated(true);
     setLoading(true);
-    updateStatus('Verifying identity...');
-    Alert.alert(
-      'Emergency Triggered!',
-      `Emergency activated via ${type}. Help is on the way.`,
-    );
-    simulateEmergencyFlow();
-  };
+    updateStatus('🧠 Transcribing emergency voice message...');
+    try {
+      const form = new FormData();
+      form.append('file', {
+        uri: recordedPath,
+        type: 'audio/wav',
+        name: 'voice.wav',
+      });
 
-  const simulateEmergencyFlow = () => {
-    setTimeout(() => {
-      updateStatus('Sending emergency data and health profile...');
-      setTimeout(() => {
-        updateStatus('Emergency services analyzing severity...');
-        setTimeout(() => {
-          updateStatus('Emergency logged. Awaiting response...');
-          setLoading(false);
-          const isHighSeverity = Math.random() > 0.5;
-          if (isHighSeverity) {
-            simulateHighSeverityResponse();
-          } else {
-            simulateNonEmergencyResponse();
-          }
-        }, 800);
-      }, 700);
-    }, 600);
+      const transcribeRes = await fetch(TRANSCRIBE_URL, {
+        method: 'POST',
+        body: form,
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      const transcribed = await transcribeRes.json();
+      const text = transcribed.transcription;
+
+      updateStatus('✅ Voice transcribed.');
+      updateStatus('📤 Sending emergency data and health profile...');
+
+      const emergencyPayload = {
+        user_id: auth.user_id,
+        voice_text: text,
+      };
+
+      const emergencyRes = await fetch(EMERGENCY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(emergencyPayload),
+      });
+
+      const emergencyResult = await emergencyRes.json();
+      updateStatus('✅ Emergency request processed.');
+      setLoading(false);
+
+      simulateHighSeverityResponse();
+    } catch (err) {
+      console.error('Emergency error:', err);
+      updateStatus('❌ Emergency request failed.');
+      setLoading(false);
+    }
   };
 
   const simulateHighSeverityResponse = () => {
     setTimeout(() => {
-      updateStatus('⚠️ HIGH SEVERITY: Emergency services alerted');
+      updateStatus('🚁 Drone dispatched with instructions');
       setTimeout(() => {
-        updateStatus('🚁 Drone dispatched with instructions');
+        updateStatus('🔴 First-aid guidance available');
         setTimeout(() => {
-          updateStatus('🔴 First-aid guidance available');
-          setTimeout(() => {
-            updateStatus('🚑 Medical personnel dispatched to your location');
-          }, 800);
+          updateStatus('🚑 Medical personnel dispatched to your location');
         }, 800);
       }, 800);
     }, 800);
   };
 
-  const simulateNonEmergencyResponse = () => {
-    setTimeout(() => {
-      updateStatus('ℹ️ NON-EMERGENCY: Medical need identified');
-      setTimeout(() => {
-        updateStatus('🚁 Drone dispatched with medication');
-        setTimeout(() => {
-          updateStatus('💊 Medication delivered with guidance');
-          setTimeout(() => {
-            updateStatus('✅ Delivery confirmed. Patient status updated.');
-          }, 800);
-        }, 800);
-      }, 800);
-    }, 800);
-  };
-
-  const startVoiceRecognition = () => {
+  const startVoiceRecognition = async () => {
     setVoiceActive(true);
-    setTimeout(() => {
-      stopVoiceRecognition();
-      handleEmergency('voice');
-    }, 2000);
+    const path = Platform.select({
+      ios: 'voice.m4a',
+      android: `${Date.now()}.mp4`,
+    });
+    await audioRecorderPlayer.startRecorder(path);
+    setRecordedPath(path);
+
+    setTimeout(async () => {
+      await stopVoiceRecognition();
+      handleEmergency();
+    }, 4000);
   };
 
-  const stopVoiceRecognition = () => {
+  const stopVoiceRecognition = async () => {
     setVoiceActive(false);
+    await audioRecorderPlayer.stopRecorder();
   };
 
   const resetEmergency = () => {
@@ -125,7 +141,7 @@ const EmergencyScreen = () => {
     }).start();
   };
 
-  const StatusUpdates = ({status, history}) => (
+  const StatusUpdates = ({ history }) => (
     <View style={styles.statusContainer}>
       <Text style={styles.statusTitle}>Emergency Status</Text>
       {loading && (
@@ -134,28 +150,25 @@ const EmergencyScreen = () => {
           <Text style={styles.loadingText}>Processing your emergency...</Text>
         </View>
       )}
-      <ScrollView
-        style={styles.statusHistory}
-        contentContainerStyle={styles.statusHistoryContent}
-        showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.statusHistory} showsVerticalScrollIndicator={false}>
         {history.map((item, index) => (
           <View
             key={index}
             style={[
               styles.statusItem,
-              index === history.length - 1 ? styles.statusItemCurrent : null,
+              index === history.length - 1 && styles.statusItemCurrent,
             ]}>
             <Text
               style={[
                 styles.statusText,
-                index === history.length - 1 ? styles.statusTextCurrent : null,
+                index === history.length - 1 && styles.statusTextCurrent,
               ]}>
               {item.text}
             </Text>
             <Text
               style={[
                 styles.statusTime,
-                index === history.length - 1 ? styles.statusTimeCurrent : null,
+                index === history.length - 1 && styles.statusTimeCurrent,
               ]}>
               {item.timestamp}
             </Text>
@@ -169,58 +182,35 @@ const EmergencyScreen = () => {
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#F8FAFC" />
       <LinearGradient colors={['#F8FAFC', '#E5E7EB']} style={styles.background}>
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollViewContent}
-          showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={styles.scrollViewContent}>
           <View style={styles.container}>
             <View style={styles.header}>
-              <FontAwesome5
-                name="exclamation-circle"
-                size={18}
-                color="#1F2937"
-                solid
-                style={styles.headerIcon}
-              />
+              <FontAwesome5 name="exclamation-circle" size={18} color="#1F2937" solid />
               <Text style={styles.title}>Emergency Response</Text>
-              <Text style={styles.subtitle}>
-                Immediate Assistance Available 24/7
-              </Text>
+              <Text style={styles.subtitle}>Immediate Assistance Available 24/7</Text>
             </View>
 
             {!emergencyActivated ? (
               <View style={styles.actionArea}>
                 <Animated.View
-                  style={[
-                    styles.emergencyButtonContainer,
-                    {transform: [{scale: buttonScale}]},
-                  ]}>
+                  style={[styles.emergencyButtonContainer, { transform: [{ scale: buttonScale }] }]}>
                   <TouchableOpacity
                     style={styles.emergencyButton}
-                    onPress={() => handleEmergency('manual')}
+                    onPress={() => Alert.alert('Manual emergency requires voice input')}
                     onPressIn={handleButtonPressIn}
                     onPressOut={handleButtonPressOut}
                     activeOpacity={0.8}>
-                    <FontAwesome5
-                      name="ambulance"
-                      size={40}
-                      color="#FFFFFF"
-                      solid
-                    />
+                    <FontAwesome5 name="ambulance" size={40} color="#FFFFFF" solid />
                     <Text style={styles.emergencyButtonText}>EMERGENCY</Text>
                   </TouchableOpacity>
                 </Animated.View>
 
                 <View style={styles.secondaryActions}>
                   <TouchableOpacity
-                    style={[
-                      styles.voiceButton,
-                      voiceActive && styles.voiceButtonActive,
-                    ]}
+                    style={[styles.voiceButton, voiceActive && styles.voiceButtonActive]}
                     onPress={
                       voiceActive ? stopVoiceRecognition : startVoiceRecognition
-                    }
-                    activeOpacity={0.7}>
+                    }>
                     <FontAwesome5
                       name="microphone"
                       size={18}
@@ -233,44 +223,19 @@ const EmergencyScreen = () => {
                     </Text>
                   </TouchableOpacity>
                 </View>
-
-                <View style={styles.infoCard}>
-                  <Text style={styles.infoTitle}>
-                    How to Use Emergency Response
-                  </Text>
-                  <Text style={styles.infoText}>
-                    • Press the <Text style={styles.boldText}>EMERGENCY</Text>{' '}
-                    button to request immediate help.
-                  </Text>
-                  <Text style={styles.infoText}>
-                    • Use <Text style={styles.boldText}>VOICE ACTIVATION</Text>{' '}
-                    to trigger help hands-free.
-                  </Text>
-                  <Text style={styles.infoText}>
-                    • Your request will be sent to the Medical Drone Dispatch
-                    Portal for rapid response.
-                  </Text>
-                  <Text style={styles.infoText}>
-                    • Drones may deliver medication or first-aid guidance as
-                    needed.
-                  </Text>
-                </View>
               </View>
             ) : (
               <View style={styles.emergencyActive}>
                 <View style={styles.emergencyHeader}>
-                  <Text style={styles.emergencyHeaderText}>
-                    EMERGENCY ACTIVE
-                  </Text>
+                  <Text style={styles.emergencyHeaderText}>EMERGENCY ACTIVE</Text>
                 </View>
-                <StatusUpdates status={currentStatus} history={statusHistory} />
-                <Animated.View style={{transform: [{scale: buttonScale}]}}>
+                <StatusUpdates history={statusHistory} />
+                <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
                   <TouchableOpacity
                     style={styles.cancelButton}
                     onPress={resetEmergency}
                     onPressIn={handleButtonPressIn}
-                    onPressOut={handleButtonPressOut}
-                    activeOpacity={0.7}>
+                    onPressOut={handleButtonPressOut}>
                     <FontAwesome5
                       name="times"
                       size={18}
@@ -278,15 +243,12 @@ const EmergencyScreen = () => {
                       solid
                       style={styles.buttonIcon}
                     />
-                    <Text style={styles.cancelButtonText}>
-                      CANCEL EMERGENCY
-                    </Text>
+                    <Text style={styles.cancelButtonText}>CANCEL EMERGENCY</Text>
                   </TouchableOpacity>
                 </Animated.View>
               </View>
             )}
           </View>
-          <View style={styles.bottomSpacer} />
         </ScrollView>
       </LinearGradient>
     </SafeAreaView>
