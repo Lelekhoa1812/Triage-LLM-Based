@@ -72,11 +72,15 @@ const ProfileScreen = () => {
         body   : JSON.stringify({username: auth.username, password: auth.password})
       });
       const json = await res.json();
+      const [y, m, d] = (p.dob || '').split('-'); // Format Splitter
       if (res.ok && json.status === 'success') {
         const p = json.profile;
         setProfile({
           fullName:            p.name                     || '',
           dateOfBirth:         p.dob                      || '',
+          year: y || '',
+          month: m || '',
+          day: d || '',
           gender:              p.sex                      || '',
           bloodType:           p.blood_type               || '',
           allergies:           (p.allergies||[]).join(', '),
@@ -101,7 +105,7 @@ const ProfileScreen = () => {
       password:           auth.password,
       user_id:            auth.user_id,
       name:               profile.fullName,
-      dob:                profile.dateOfBirth,
+      dob: `${(profile.year||'0000').padStart(4,'0')}-${(profile.month||'01').padStart(2,'0')}-${(profile.day||'01').padStart(2,'0')}`,
       sex:                profile.gender,
       phone_number:       '',
       email_address:      auth.username,
@@ -183,52 +187,89 @@ const ProfileScreen = () => {
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {FIELD_ORDER.map(key => (
-          (key==='medicalDocuments' && !editing) ? null : (     /* hide upload row in view-mode */
-          <View key={key} style={styles.fieldContainer}>
-            <View style={styles.labelContainer}>
-              <FontAwesome5 name={ICONS[key]} size={18} color="#007BFF" style={styles.fieldIcon}/>
-              <Text style={styles.label}>{fmt(key)}</Text>
-            </View>
+          (key === 'medicalDocuments' && !editing) ? null : (
+            <View key={key} style={styles.fieldContainer}>
+              <View style={styles.labelContainer}>
+                <FontAwesome5 name={ICONS[key]} size={18} color="#007BFF" style={styles.fieldIcon} />
+                <Text style={styles.label}>{fmt(key)}</Text>
+              </View>
 
-            {key === 'medicalDocuments' ? (
-              <TouchableOpacity style={styles.uploadBtn} onPress={pickAndSummarise}>
-                <Text style={{color:'#007BFF'}}>Upload PDF / Image</Text>
-              </TouchableOpacity>
-            ) : key === 'insuranceCard' ? (
-              editing ? (
+              {key === 'medicalDocuments' ? (
+                <TouchableOpacity style={styles.uploadBtn} onPress={pickAndSummarise}>
+                  <Text style={{color:'#007BFF'}}>Upload PDF / Image</Text>
+                </TouchableOpacity>
+              ) : key === 'insuranceCard' ? (
+                editing ? (
+                  <TextInput
+                    style={styles.input}
+                    value={profile.insuranceCard}
+                    placeholder="Enter insurance number"
+                    onChangeText={v => setProfile({...profile, insuranceCard: v})}
+                  />
+                ) : (
+                  <Text style={styles.value}>{profile.insuranceCard || 'Not specified'}</Text>
+                )
+              ) : key === 'pastMedicalHistory' || key === 'currentMedication' ? (
+                editing ? (
+                  <TextInput
+                    style={[styles.input, {height: 90, textAlignVertical: 'top'}]}
+                    multiline
+                    value={profile[key]}
+                    onChangeText={v => setProfile({...profile, [key]: v})}
+                    placeholder={`Enter ${fmt(key)}`}
+                  />
+                ) : (
+                  <Text style={styles.value}>{profile[key] || 'Not specified'}</Text>
+                )
+              ) : key === 'dateOfBirth' && editing ? (
+                <View style={{flexDirection: 'row', alignItems: 'center', gap: 4}}>
+                  <TextInput
+                    style={[styles.input, {width: 60}]}
+                    placeholder="DD"
+                    maxLength={2}
+                    keyboardType="numeric"
+                    value={profile.day || ''}
+                    onChangeText={v => setProfile({...profile, day: v})}
+                  />
+                  <Text style={{marginHorizontal: 4}}>/</Text>
+                  <TextInput
+                    style={[styles.input, {width: 60}]}
+                    placeholder="MM"
+                    maxLength={2}
+                    keyboardType="numeric"
+                    value={profile.month || ''}
+                    onChangeText={v => setProfile({...profile, month: v})}
+                  />
+                  <Text style={{marginHorizontal: 4}}>/</Text>
+                  <TextInput
+                    style={[styles.input, {width: 80}]}
+                    placeholder="YYYY"
+                    maxLength={4}
+                    keyboardType="numeric"
+                    value={profile.year || ''}
+                    onChangeText={v => setProfile({...profile, year: v})}
+                  />
+                </View>
+              ) : key === 'dateOfBirth' ? (
+                <Text style={styles.value}>
+                  {profile.dateOfBirth
+                    ? new Date(profile.dateOfBirth).toLocaleDateString()
+                    : 'Not specified'}
+                </Text>
+              ) : editing ? (
                 <TextInput
                   style={styles.input}
-                  value={profile.insuranceCard}
-                  placeholder="Enter insurance number"
-                  onChangeText={v=>setProfile({...profile,insuranceCard:v})}
-                />
-              ) : (
-                <Text style={styles.value}>{profile.insuranceCard||'Not specified'}</Text>
-              )
-            ) : key === 'pastMedicalHistory' || key === 'currentMedication' ? (
-              editing ? (
-                <TextInput
-                  style={[styles.input,{height:90,textAlignVertical:'top'}]}
-                  multiline
                   value={profile[key]}
-                  onChangeText={v=>setProfile({...profile,[key]:v})}
+                  onChangeText={v => setProfile({...profile, [key]: v})}
                   placeholder={`Enter ${fmt(key)}`}
                 />
               ) : (
-                <Text style={styles.value}>{profile[key]||'Not specified'}</Text>
-              )
-            ) : editing ? (
-              <TextInput
-                style={styles.input}
-                value={profile[key]}
-                onChangeText={v=>setProfile({...profile,[key]:v})}
-                placeholder={`Enter ${fmt(key)}`}
-              />
-            ) : (
-              <Text style={styles.value}>{key==='dateOfBirth' ? new Date(profile[key]).toLocaleDateString() : profile[key] || 'Not specified'}</Text>
-            )}
-          </View>)
+                <Text style={styles.value}>{profile[key] || 'Not specified'}</Text>
+              )}
+            </View>
+          )
         ))}
+      </ScrollView>
 
         <Animated.View style={[styles.buttonContainer,{transform:[{scale:buttonScale}]}]}>
           <TouchableOpacity
