@@ -92,13 +92,16 @@ document.getElementById("profile-form").addEventListener("submit", async (e) => 
     password: authState.password,
     user_id: authState.user_id,
     name: document.getElementById("name").value,
-    age: parseInt(document.getElementById("age").value),
+    dob: parseInt(document.getElementById("dob").value),
     sex: document.getElementById("sex").value,
+    phone_number: document.getElementById("phone_number").value,
+    email_address: document.getElementById("email_address").value,
     blood_type: document.getElementById("blood_type").value,
     allergies: document.getElementById("allergies").value.split(",").map(x => x.trim()),
     medical_history: document.getElementById("medical_history").value.split(",").map(x => x.trim()),
     active_medications: document.getElementById("active_medications").value.split(",").map(x => x.trim()),
     disability: document.getElementById("disability").value,
+    insurance_card: document.getElementById("insurance_card").value,
     home_address: document.getElementById("home_address").value,
     emergency_contact: {
       name: document.getElementById("emergency_name").value || "N/A",
@@ -243,13 +246,16 @@ async function loadUserProfile() {
       const profile = result.profile;
       // Pre-fill the fields
       document.getElementById("name").value = profile.name || "";
-      document.getElementById("age").value = profile.age || "";
+      document.getElementById("dob").value = profile.dob || "";
       document.getElementById("sex").value = profile.sex || "";
+      document.getElementById("phone_number").value = profile.phone_number || "";
+      document.getElementById("email_address").value = profile.email_address || "";
       document.getElementById("blood_type").value = profile.blood_type || "";
       document.getElementById("allergies").value = (profile.allergies || []).join(", ");
       document.getElementById("medical_history").value = (profile.medical_history || []).join(", ");
       document.getElementById("active_medications").value = (profile.active_medications || []).join(", ");
       document.getElementById("disability").value = profile.disability || "";
+      document.getElementById("insurance_card").value = profile.insurance_card || "";
       document.getElementById("home_address").value = profile.home_address || "";
       document.getElementById("emergency_name").value = profile.emergency_contact?.name || "";
       document.getElementById("emergency_phone").value = profile.emergency_contact?.phone || "";

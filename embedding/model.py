@@ -7,13 +7,16 @@ class UserData(BaseModel):
     password: str
     user_id: str
     name: str
-    age: int
+    dob: str
     sex: str
+    phone_number: str
+    email_address: str
     blood_type: str
     allergies: List[str]
     medical_history: List[str]
     active_medications: List[str]
     disability: str
+    insurance_card: str
     home_address: str
     emergency_contact: Dict[str, str]
     embedded_profile: Optional[str] = None

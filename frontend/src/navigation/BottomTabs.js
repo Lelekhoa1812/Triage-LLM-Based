@@ -1,6 +1,5 @@
-// src/navigation/BottomTabs.js
 import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import ChatbotScreen from '../screens/ChatbotScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import EmergencyScreen from '../screens/EmergencyScreen';
@@ -13,11 +12,10 @@ const Tab = createBottomTabNavigator();
 const BottomTabs = () => {
   return (
     <Tab.Navigator
-      tabBar={(props) => <CustomTabBar {...props} />}
+      tabBar={props => <CustomTabBar {...props} />}
       screenOptions={{
         headerShown: false,
-      }}
-    >
+      }}>
       <Tab.Screen name="Chatbot" component={ChatbotScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
       <Tab.Screen name="Emergency" component={EmergencyScreen} />

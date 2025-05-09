@@ -356,9 +356,15 @@ async def register_user(data: dict):
 # Login
 @app.post("/login")
 async def login_user(data: dict):
-    username = data.get("username")
+    identifier = data.get("username")  # could be username or email 
     password = data.get("password")
-    user = user_collection.find_one({"username": username, "password": password})
+    if not identifier or not password:
+        raise HTTPException(status_code=400, detail="Username/Email and Password Required")
+    # Match on either username or email from document
+    user = user_collection.find_one({
+        "$or": [{"username": identifier}, {"email": identifier}],
+        "password": password
+    })    
     if not user:
         return JSONResponse(status_code=401, content={"status": "error", "message": "Invalid credentials."})
     return {"status": "success", "user_id": user.get("user_id")}
@@ -375,6 +381,33 @@ async def update_profile(data: dict):
     except Exception as e:
         logger.error(f"[PROFILE_ERROR] {e}")
         return {"status": "error", "message": f"Failed to update profile: {e}"}
+
+# ──────────────────────────────────────────────────────────────────────────────
+# 4)  Document / Image  ➜  Gemini summary   (≤100 words)
+# ──────────────────────────────────────────────────────────────────────────────
+@app.post("/summarize")
+async def summarize_doc(file: UploadFile = File(...)):
+    if file.content_type not in {
+        "application/pdf", "image/png", "image/jpeg", "image/jpg"
+    }:
+        raise HTTPException(415, "Unsupported file type")
+
+    # Read bytes + base64 encode so we can pass into Gemini prompt
+    blob = await file.read()
+    b64  = base64.b64encode(blob).decode()
+
+    prompt = (
+        "You are a medical assistant. "
+        "Summarise the following medical document in under 100 words:\n"
+        f"BASE64_CONTENT:{b64}"
+    )
+    try:
+        summary = call_gemini(prompt)[:600]  # safety trim
+        logger.info(f"[SUMMARY] {summary}")
+        return {"status": "success", "summary": summary}
+    except Exception as e:
+        logger.error(f"[SUMMARISE_ERROR] {e}")
+        raise HTTPException(500, "Gemini summarisation failed")
 
 # ──────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":

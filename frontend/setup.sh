@@ -36,7 +36,7 @@ else
   echo "⚠️ SDKMAN not installed. Please manually ensure Java 17 is active."
 fi
 
-# Configure Android NDK 
+# Configure Android NDK
 NDK_VERSION="26.1.10909125"
 NDK_PATH="$HOME/Library/Android/sdk/ndk/$NDK_VERSION"
 

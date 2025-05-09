@@ -10,6 +10,21 @@ from typing import Union
 from model import UserData
 from dotenv import load_dotenv
 
+# ──────────────────────────────────────────────────────────────────────────────
+# Logging Setup (Debugs)
+# ──────────────────────────────────────────────────────────────────────────────
+import logging
+logger = logging.getLogger("profile-response")
+logger.setLevel(logging.INFO)
+fmt = logging.Formatter("[%(levelname)s] %(asctime)s - %(message)s")
+handler = logging.StreamHandler()
+handler.setFormatter(fmt)
+logger.addHandler(handler)
+# suppress noisy libs
+for lib in ("pymongo", "urllib3", "httpx", "uvicorn",):
+    logging.getLogger(lib).setLevel(logging.WARNING)
+
+
 # Load environment variables
 load_dotenv()
 
@@ -43,15 +58,18 @@ embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 # --- Helpers ---
 def get_or_create_user(doc: UserData) -> str:
     """
-    Authenticate by username/password. If user exists, ensure user_id matches.
+    Authenticate by username/email and password. If user exists, ensure user_id matches.
     Otherwise, create a new user entry with a generated user_id.
     Returns the faiss_file name.
     """
     existing = user_collection.find_one({
-        "username": doc.username,
+        "$or": [
+          {"username": doc.username},
+          {"email_address": doc.username}
+        ],        
         "password": doc.password
     })
-    print(f"[DEBUG] Found existing user: {existing}") # Comment in for simplicity
+    logger.info(f"[DEBUG] Found existing user: {existing}") # Comment in for simplicity
     # Fetch FAISS file for existing user or create new
     if existing:
         if "faiss_file" in existing:
@@ -65,7 +83,7 @@ def get_or_create_user(doc: UserData) -> str:
                 {"_id": existing["_id"]},
                 {"$set": {"faiss_file": faiss_file_name}}
             )
-            print(f"⚠️ Added missing faiss_file for existing user: {doc.username}")
+            logger.warning(f"⚠️ Added missing faiss_file for existing user: {doc.username}")
             return os.path.join(FAISS_DIR, faiss_file_name)
     # New user: assign user_id if not provided
     user_id = doc.user_id or str(uuid.uuid4())
@@ -80,20 +98,22 @@ def get_or_create_user(doc: UserData) -> str:
         # store initial profile snapshot
         "profile": {
             "name": doc.name,
-            "age": doc.age,
+            "dob": doc.dob,
             "sex": doc.sex,
+            "phone_number": doc.phone_number,
+            "email_address": doc.email_address,
             "blood_type": doc.blood_type,
             "allergies": doc.allergies,
             "medical_history": doc.medical_history,
             "active_medications": doc.active_medications,
             "disability": doc.disability,
+            "insurance_card": doc.insurance_card,
             "home_address": doc.home_address,
             "emergency_contact": doc.emergency_contact,
-            "embedded_profile": doc.embedded_profile,
             "last_updated": doc.last_updated
         }
     })
-    print(f"✅ Created new user: {doc.username} ({user_id})")
+    logger.info(f"✅ Created new user: {doc.username} ({user_id})")
     return faiss_file_path
 
 # --- API Endpoint ---
@@ -105,16 +125,18 @@ async def update_user_data(data: UserData):
     # 2) Build the concatenated medical info string
     medical_info = (
         f"Name: {data.name}\n"
-        f"Age: {data.age}\n"
+        f"Date of Birth: {data.dob}\n"
         f"Sex: {data.sex}\n"
+        f"Phone Number: {data.phone_number}\n"
+        f"Email Address: {data.email_address}\n"
         f"Blood Type: {data.blood_type}\n"
         f"Allergies: {', '.join(data.allergies)}\n"
         f"Medical History: {data.medical_history}\n"
         f"Active Medications: {', '.join(data.active_medications)}\n"
         f"Disability: {data.disability}\n"
+        f"Insurance Card: {data.insurance_card}\n"
         f"Home Address: {data.home_address}\n"
         f"Emergency Contact: {data.emergency_contact}\n"
-        f"Embedded Profile (if any): {data.embedded_profile}\n"
         f"Last Updated: {data.last_updated}\n"
     )
 
@@ -131,7 +153,7 @@ async def update_user_data(data: UserData):
     index.add(embedding)
     os.makedirs(os.path.dirname(faiss_file), exist_ok=True) # Ensure exist path upon refresh
     faiss.write_index(index, faiss_file)
-    print(f"✅ Updated FAISS index for {data.username} → {faiss_file}")
+    logger.info(f"✅ Updated FAISS index for {data.username} → {faiss_file}")
 
     # 6) Update MongoDB snapshot
     user_collection.update_one(
@@ -140,35 +162,34 @@ async def update_user_data(data: UserData):
             "faiss_file": faiss_file,
             "profile": {
                 "name": data.name,
-                "age": data.age,
+                "dob": data.dob,
                 "sex": data.sex,
+                "phone_number": data.phone_number,
+                "email_address": data.email_address,
                 "blood_type": data.blood_type,
                 "allergies": data.allergies,
                 "medical_history": data.medical_history,
                 "active_medications": data.active_medications,
                 "disability": data.disability,
+                "insurance_card": data.insurance_card,
                 "home_address": data.home_address,
                 "emergency_contact": data.emergency_contact,
-                "embedded_profile": data.embedded_profile,
                 "last_updated": data.last_updated
             }
         }}
     )
-    print(f"✅ MongoDB profile snapshot updated for {data.username}")
-
+    logger.info(f"✅ MongoDB profile snapshot updated for {data.username}")
     return {"status": "success", "message": f"User {data.username} data embedded."}
 
 
 '''
-=> Expose RAG as a specific POST /predict endpoint
+Expose RAG as a specific POST /predict endpoint
 This is since Hugging Face does not expose raw FastAPI endpoints (/update_user_data) to external callers in other Spaces unless:
-- Serve app as an inference Space 
-- Wrap the endpoint in an api/predict 
-- Wrap the app in Gradio interface
+=> Wrap the endpoint in an api/predict 
 '''
 @app.post("/predict")
 async def predict_route(data: UserData):
-    print("[DEBUG] Received /predict payload:", data.dict())
+    logger.info("[DEBUG] Received /predict payload:", data.dict())
     return await update_user_data(data)
 
 # Upon Frontend startup, RAG server is expected to automatically fetch and send profile data of existing user
@@ -177,7 +198,14 @@ async def get_user_profile(credentials: dict = Body(...)):
     username = credentials.get("username")
     password = credentials.get("password")
     # Find matched credential
-    user = user_collection.find_one({"username": username, "password": password})
+    user = user_collection.find_one({
+       "password": password,
+       "$or": [
+         {"username": username},
+         {"email_address": username}
+       ]
+    })    
+    logger.info("[UPDATE] pointing to account at", user)
     if not user:
         raise HTTPException(status_code=404, detail="User not found or incorrect credentials")
     # Append corresponding profile

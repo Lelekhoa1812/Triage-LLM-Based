@@ -1,51 +1,60 @@
-// src/components/CustomTabBar.js
 import React from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, Dimensions } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
+import {
+  View,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  Dimensions,
+  Image,
+  Platform,
+} from 'react-native';
+import Svg, {Path} from 'react-native-svg';
 
-// Icons
-import { Image } from 'react-native';
-import chatbotIcon from '../components/icons/chatbot.png';
-import profileIcon from '../components/icons/profile.png';
-import emergencyIcon from '../components/icons/emergency.png';
-import qrwalletIcon from '../components/icons/qrwallet.png';
-import settingsIcon from '../components/icons/settings.png';
+// Update icon paths if necessary
+import chatbotIcon from '../../assets/icons/chatbot.png';
+import profileIcon from '../../assets/icons/profile.png';
+import emergencyIcon from '../../assets/icons/emergency.png';
+import qrwalletIcon from '../../assets/icons/qrwallet.png';
+import settingsIcon from '../../assets/icons/settings.png';
 
-const { width } = Dimensions.get('window');
+const {width} = Dimensions.get('window');
 
-// Tab design
-const TabBar = ({ state, descriptors, navigation }) => {
-  const height = 80;
-  const radius = 30;
+const TabBar = ({state, descriptors, navigation}) => {
+  const height = 70;
   const tabWidth = width / state.routes.length;
 
-  return (
-    <View style={{ position: 'absolute', bottom: 0, width, height }}>
-      <Svg width={width} height={height} style={styles.svgStyle}>
-        <Path
-          d={`
-            M0 0
-            H${width}
-            V${height}
-            H0
-            Z
-          `}
-          fill="#0047AB"
-        />
-      </Svg>
+  const tabConfig = {
+    Chatbot: {icon: chatbotIcon, activeColor: 'black', activeBgColor: 'white'},
+    Profile: {icon: profileIcon, activeColor: 'black', activeBgColor: 'white'},
+    Emergency: {
+      icon: emergencyIcon,
+      activeColor: 'white',
+      activeBgColor: '#FF3B30',
+    },
+    QRWallet: {
+      icon: qrwalletIcon,
+      activeColor: 'black',
+      activeBgColor: 'white',
+    },
+    Settings: {
+      icon: settingsIcon,
+      activeColor: 'black',
+      activeBgColor: 'white',
+    },
+  };
 
-      // Stylings
+  return (
+    <View style={styles.container}>
+      <Svg width={width} height={height} style={styles.svgStyle}>
+        <Path d={`M0 0 H${width} V${height} H0 Z`} fill="#0047AB" />
+      </Svg>
       <View style={styles.tabContainer}>
         {state.routes.map((route, index) => {
-          const { options } = descriptors[route.key];
-          const label = options.tabBarLabel !== undefined
-            ? options.tabBarLabel
-            : options.title !== undefined
-            ? options.title
-            : route.name;
-
-          // Trigger focus
+          const {options} = descriptors[route.key];
+          const label = options.tabBarLabel ?? options.title ?? route.name;
           const isFocused = state.index === index;
+          const config = tabConfig[route.name] || {};
+
           const onPress = () => {
             const event = navigation.emit({
               type: 'tabPress',
@@ -57,48 +66,55 @@ const TabBar = ({ state, descriptors, navigation }) => {
             }
           };
 
-          // Define icons
-          const iconMap = {
-            Chatbot: chatbotIcon,
-            Profile: profileIcon,
-            Emergency: emergencyIcon,
-            QRWallet: qrwalletIcon,
-            Settings: settingsIcon,
+          const onLongPress = () => {
+            navigation.emit({
+              type: 'tabLongPress',
+              target: route.key,
+            });
           };
-          const focusedIcon = route.name === 'Emergency' ? 'white' : '#00008B'; // Dark red for Emergency
-          const focusedBackground = route.name === 'Emergency' ? '#8B0000' : 'white'; // Dark red for Emergency
-          // Button stylings
+
+          const isEmergency = route.name === 'Emergency';
+
           return (
             <TouchableOpacity
               key={index}
               accessibilityRole="button"
+              accessibilityState={isFocused ? {selected: true} : {}}
+              accessibilityLabel={options.tabBarAccessibilityLabel}
+              testID={options.tabBarTestID}
               onPress={onPress}
-              style={styles.tabButton}
-              activeOpacity={0.8}
-            >
-              // On focus
+              onLongPress={onLongPress}
+              style={[styles.tabButton, isEmergency && styles.emergencyTab]}
+              activeOpacity={0.7}>
               <View
-              // Focus emergency as red
-              style={
-                    isFocused
-                      ? [styles.focusedIconWrapper, { backgroundColor: focusedBackground }]
-                      : styles.iconWrapper
-                  }
-                >
+                style={[
+                  isFocused ? styles.focusedIconWrapper : styles.iconWrapper,
+                  {
+                    backgroundColor: isFocused
+                      ? config.activeBgColor
+                      : 'transparent',
+                  },
+                  isEmergency && isFocused && styles.emergencyFocused,
+                ]}>
                 <Image
-                  source={iconMap[route.name]}
+                  source={config.icon}
                   style={{
-                    width: isFocused ? 28 : 24,
-                    height: isFocused ? 28 : 24,
-                    tintColor: isFocused ? focusedIcon : 'white',
+                    width: isFocused ? 24 : 20,
+                    height: isFocused ? 24 : 20,
+                    tintColor: isFocused ? config.activeColor : 'white',
                   }}
                   resizeMode="contain"
                 />
               </View>
-              // Text focus
-              <Text style={{ fontSize: isFocused ? 15 : 11, color: 'white' }}>
+              <Text
+                style={[
+                  styles.tabLabel,
+                  {fontSize: isFocused ? 11 : 9},
+                  isEmergency && styles.emergencyLabel,
+                ]}>
                 {label}
               </Text>
+              {isEmergency && <View style={styles.emergencyDot} />}
             </TouchableOpacity>
           );
         })}
@@ -108,6 +124,13 @@ const TabBar = ({ state, descriptors, navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    height: 70,
+    backgroundColor: 'transparent',
+  },
   svgStyle: {
     position: 'absolute',
     top: 0,
@@ -117,31 +140,66 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'flex-end',
     height: '100%',
-    paddingBottom: 10,
-    paddingHorizontal: 10,
+    paddingBottom: 6,
+    paddingHorizontal: 8,
   },
   tabButton: {
     alignItems: 'center',
     justifyContent: 'center',
     flex: 1,
+    paddingTop: 6,
   },
   focusedIconWrapper: {
-    backgroundColor: 'white',
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 10,
-    padding: 10,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    top: -5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    padding: 8,
+    width: 40,
+    height: 40,
+    borderRadius: 23,
+    marginBottom: 2,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: {width: 0, height: 3},
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
   iconWrapper: {
     padding: 6,
+    marginBottom: 2,
+  },
+  tabLabel: {
+    color: 'white',
+    fontWeight: '500',
+    marginTop: 2,
+    fontFamily: 'Inter-SemiBold',
+  },
+  emergencyTab: {
+    position: 'relative',
+  },
+  emergencyFocused: {
+    backgroundColor: '#FF3B30',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.7)',
+  },
+  emergencyLabel: {
+    fontWeight: 'bold',
+  },
+  emergencyDot: {
+    position: 'absolute',
+    top: 3,
+    right: '30%',
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: '#FF3B30',
+    borderWidth: 1,
+    borderColor: 'white',
   },
 });
 
