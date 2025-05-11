@@ -152,7 +152,7 @@ const ProfileScreen = () => {
       });
       // Send file to FastAPI and summarise into text-content
       try {
-        const r = await fetch(`${TRIAGE_URL}/summarize`, {
+        const r = await fetch(`${PROFILE_URL}/summarize`, {
           method : 'POST',
           headers: {'Content-Type': 'multipart/form-data'},
           body   : form
