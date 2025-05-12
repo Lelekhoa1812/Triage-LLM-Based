@@ -22,7 +22,7 @@ const PROFILE_URL = 'https://binkhoale1812-medical-profile.hf.space';  // /get_p
 /* -------------------------------------------------------------------------- */
 /*  Auth – replace with context / secure store                                */
 /* -------------------------------------------------------------------------- */
-const auth = {username: 'Khoa', password: '122003', user_id: 'abc123'};
+const auth = {username: 'Khoa', password: '122003', user_id: 'bda550aa4e88'};
 
 /* -------------------------------------------------------------------------- */
 const FIELD_ORDER = [
