@@ -72,9 +72,9 @@ const ProfileScreen = () => {
         body   : JSON.stringify({username: auth.username, password: auth.password})
       });
       const json = await res.json();
-      const [y, m, d] = (p.dob || '').split('-'); // Format Splitter
       if (res.ok && json.status === 'success') {
         const p = json.profile;
+        const [y, m, d] = (p.dob || '').split('-'); // Format Splitter
         setProfile({
           fullName:            p.name                     || '',
           dateOfBirth:         p.dob                      || '',
@@ -108,7 +108,7 @@ const ProfileScreen = () => {
       dob: `${(profile.year||'0000').padStart(4,'0')}-${(profile.month||'01').padStart(2,'0')}-${(profile.day||'01').padStart(2,'0')}`,
       sex:                profile.gender,
       phone_number:       '',
-      email_address:      auth.username,
+      email_address:      profile.username,
       blood_type:         profile.bloodType,
       allergies:          profile.allergies.split(',').map(s=>s.trim()),
       medical_history:    profile.pastMedicalHistory.split(',').map(s=>s.trim()),
