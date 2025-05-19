@@ -130,11 +130,13 @@ const ProfileScreen = () => {
         body   : JSON.stringify(payload)
       });
       const j = await r.json();
+      console.log('Update profile response:', j);
       if (j.status === 'success') {
         Alert.alert('Profile updated');
         setEditing(false);
-      } else { throw new Error(j.message); }
+      } else { throw new Error(j.message || 'Backend rejected profile'); }
     } catch (e) {
+      console.warn('❌ Fetch error:', e);
       Alert.alert('Save failed', e.message || 'Network error');
     }
   };
