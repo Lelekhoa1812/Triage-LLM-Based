@@ -60,21 +60,25 @@ const ChatbotScreen = () => {
 
   const sendMessage = async () => {
     if (!input.trim()) return;
-
-    const userMsg = {role: 'user', text: input.trim()};
-    setMessages(prevMessages => [...prevMessages, userMsg]);
+    // Send msg 
+    const userMsg = { role: 'user', text: input.trim() };
+    const updatedMessages = [...messagesRef.current, userMsg];
+    setMessages(updatedMessages);           // update state
+    messagesRef.current = updatedMessages;  // update ref
     setInput('');
     setLoading(true);
     animateNewMessage();
-
+    // Await for resp
     try {
       const response = await axios.post(API_URL, {
         query: userMsg.text,
         lang: language,
       });
-
-      const botMsg = {role: 'bot', text: response.data.response};
-      setMessages(prevMessages => [...prevMessages, botMsg]);
+      // Break JSON body
+      const botMsg = { role: 'bot', text: response.data.response };
+      const finalMessages = [...messagesRef.current, botMsg];
+      setMessages(finalMessages);
+      messagesRef.current = finalMessages;
       animateNewMessage();
     } catch (err) {
       const errorMsg = {
@@ -82,12 +86,14 @@ const ChatbotScreen = () => {
         text: "I'm having trouble connecting right now. Please try again in a moment.",
         isError: true,
       };
-      setMessages(prevMessages => [...prevMessages, errorMsg]);
+      const finalMessages = [...messagesRef.current, errorMsg];
+      setMessages(finalMessages);
+      messagesRef.current = finalMessages;
       animateNewMessage();
     }
-
+    // Don't wait
     setLoading(false);
-  };
+  };  
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
