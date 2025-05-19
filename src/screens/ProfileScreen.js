@@ -124,7 +124,7 @@ const ProfileScreen = () => {
     };
 
     try {
-      const r = await fetch(`${PROFILE_URL}/predict`, {
+      const r = await fetch(`${TRIAGE_URL}/profile`, {
         method : 'POST',
         headers: {'Content-Type':'application/json'},
         body   : JSON.stringify(payload)
@@ -140,34 +140,41 @@ const ProfileScreen = () => {
   };
 
   /* ----------------------------- upload + summarise ---------------------- */
-  const pickAndSummarise = () => {
-    ImagePicker.launchDocument({selectionLimit: 1}, async (resp) => {
+  const pickAndSummarise = (targetField) => {
+    ImagePicker.launchDocument({ selectionLimit: 1 }, async (resp) => {
       if (resp.didCancel || resp.errorCode) return;
       const f = resp.assets[0];
       const form = new FormData();
       form.append('file', {
-        uri : f.uri,
+        uri: f.uri,
         type: f.type || 'application/pdf',
         name: f.fileName || 'upload'
       });
-      // Send file to FastAPI and summarise into text-content
+      // Connect to summarize endpoint
       try {
         const r = await fetch(`${PROFILE_URL}/summarize`, {
-          method : 'POST',
-          headers: {'Content-Type': 'multipart/form-data'},
-          body   : form
+          method: 'POST',
+          headers: { 'Content-Type': 'multipart/form-data' },
+          body: form
         });
         const j = await r.json();
         if (j.status === 'success') {
-          setProfile(p => ({
+          const today = new Date().toLocaleDateString("en-GB"); // dd/mm/yyyy
+          const newText = `\n${today}\n${j.summary}`;
+          setProfile((p) => ({
             ...p,
-            pastMedicalHistory : j.summary,
-            currentMedication  : j.summary
+            [targetField]: (p[targetField] + newText).trim()
           }));
-        } else throw new Error(j.message);
-      } catch (e) { Alert.alert('Summarise error', e.message); }
+          Alert.alert("Summary added to " + fmt(targetField));
+        } else {
+          throw new Error(j.message);
+        }
+      } catch (e) {
+        Alert.alert('Summarise error', e.message || 'Upload failed');
+      }
     });
   };
+  
 
   /* ---------------------------- UI helpers ------------------------------- */
   const fmt = (k) => k.replace(/([A-Z])/g, ' $1').replace(/^./, s=>s.toUpperCase());
@@ -209,19 +216,26 @@ const ProfileScreen = () => {
                 ) : (
                   <Text style={styles.value}>{profile.insuranceCard || 'Not specified'}</Text>
                 )
-              ) : key === 'pastMedicalHistory' || key === 'currentMedication' ? (
-                editing ? (
-                  <TextInput
-                    style={[styles.input, {height: 90, textAlignVertical: 'top'}]}
-                    multiline
-                    value={profile[key]}
-                    onChangeText={v => setProfile({...profile, [key]: v})}
-                    placeholder={`Enter ${fmt(key)}`}
-                  />
-                ) : (
-                  <Text style={styles.value}>{profile[key] || 'Not specified'}</Text>
-                )
-              ) : key === 'dateOfBirth' && editing ? (
+                ) : key === 'pastMedicalHistory' || key === 'currentMedication' ? (
+                  editing ? (
+                    <>
+                      <TextInput
+                        style={[styles.input, { height: 100, textAlignVertical: 'top' }]}
+                        multiline
+                        value={profile[key]}
+                        onChangeText={(v) => setProfile({ ...profile, [key]: v })}
+                        placeholder={`Enter ${fmt(key)}`}
+                      />
+                      <TouchableOpacity
+                        style={[styles.uploadBtn, { marginTop: 8 }]}
+                        onPress={() => pickAndSummarise(key)}>
+                        <Text style={{ color: '#007BFF' }}>Upload New Document</Text>
+                      </TouchableOpacity>
+                    </>
+                  ) : (
+                    <Text style={styles.value}>{profile[key] || 'Not specified'}</Text>
+                  )
+                ) : key === 'dateOfBirth' && editing ? (
                 <View style={{flexDirection: 'row', alignItems: 'center', gap: 4}}>
                   <TextInput
                     style={[styles.input, {width: 60}]}
