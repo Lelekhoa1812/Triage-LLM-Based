@@ -187,9 +187,12 @@ const ChatbotScreen = () => {
                     <Text style={styles.messageLabel}> DocBot</Text>
                   </View>
                 )}
-                <Markdown // Render Bot response in Markdown
+                <Markdown
                   style={{
-                    body: [styles.messageText, msg.isError && styles.errorText],
+                    body: {fontSize: 16, color: '#1F2937'},
+                    strong: {fontWeight: 'bold'},
+                    em: {fontStyle: 'italic'},
+                    bullet_list: {marginLeft: 20},
                   }}>
                   {msg.text}
                 </Markdown>
