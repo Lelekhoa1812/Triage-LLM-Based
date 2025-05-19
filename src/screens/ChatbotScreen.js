@@ -16,6 +16,7 @@ import {
 import axios from 'axios';
 import {LanguageContext} from '../context/LanguageContext';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import Markdown from 'react-native-markdown-display'; // Render MarkDown
 
 const API_URL = 'https://BinKhoaLe1812-Medical-Chatbot.hf.space/chat';
 
@@ -186,10 +187,12 @@ const ChatbotScreen = () => {
                     <Text style={styles.messageLabel}> DocBot</Text>
                   </View>
                 )}
-                <Text
-                  style={[styles.messageText, msg.isError && styles.errorText]}>
+                <Markdown // Render Bot response in Markdown
+                  style={{
+                    body: [styles.messageText, msg.isError && styles.errorText],
+                  }}>
                   {msg.text}
-                </Text>
+                </Markdown>
               </Animated.View>
             </React.Fragment>
           ))}
