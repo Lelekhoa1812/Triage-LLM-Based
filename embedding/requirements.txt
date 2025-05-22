@@ -1,8 +1,17 @@
+# Server
 fastapi
 uvicorn[standard]
+
+# DB and API
 pymongo
 python-dotenv
+
+# Embedding
 sentence-transformers
 faiss-cpu
 numpy
 pydantic
+
+# LLM
+google-genai
+python-multipart

@@ -17,6 +17,7 @@ npm install @react-navigation/native @react-navigation/stack @react-navigation/n
 npm install react-native-gesture-handler react-native-reanimated \
             react-native-screens react-native-safe-area-context \
             @react-native-community/masked-view
+
 # Bottom bar
 npm install @react-navigation/bottom-tabs
 # Fetch backend
@@ -25,6 +26,12 @@ npm install axios
 npm install react-native-vector-icons
 # QR generation
 npm install react-native-qrcode-svg
+# Markdown renderer
+npm install react-native-markdown-display
+# Audio recording
+npm install react-native-audio-recorder-player
+# Image renderer
+npm i react-native-image-picker
 
 
 # Set Java 17 via SDKMAN (optional)

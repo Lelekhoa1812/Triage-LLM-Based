@@ -1,4 +1,5 @@
 const BASE_URL = "https://binkhoale1812-triage-llm.hf.space";
+const RAG_URL = "https://binkhoale1812-medical-profile.hf.space";
 const LOGIN_API = `${BASE_URL}/login`;
 const REGISTER_API = `${BASE_URL}/register`;
 const PROFILE_API = `${BASE_URL}/profile`;
@@ -132,7 +133,7 @@ document.getElementById("profile-form").addEventListener("submit", async (e) => 
 // --- Auto-Fill Profile ---
 async function loadUserProfile() {
   try {
-    const res = await fetch("https://binkhoale1812-medical-profile.hf.space/get_profile", {
+    const res = await fetch(`${RAG_URL}/get_profile`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -181,7 +182,7 @@ async function handleFileUpload(targetField) {
   formData.append("file", file);
   // Send to Gemini to summarize file content
   try {
-    const res = await fetch(`${BASE_URL}/summarize`, {
+    const res = await fetch(`${RAG_URL}/summarize`, {
       method: "POST",
       body: formData
     });

@@ -393,36 +393,5 @@ async def update_profile(data: dict):
         return {"status": "error", "message": f"Failed to update profile: {e}"}
 
 # ──────────────────────────────────────────────────────────────────────────────
-# 4)  Document / Image  ➜  Gemini summary   (≤100 words)
-# ──────────────────────────────────────────────────────────────────────────────
-@app.post("/summarize")
-async def summarize_doc(file: UploadFile = File(...)):
-    if file.content_type not in {
-        "application/pdf", "image/png", "image/jpeg", "image/jpg"
-    }:
-        raise HTTPException(415, "Unsupported file type")
-
-    # Read bytes + base64 encode so we can pass into Gemini prompt
-    blob = await file.read()
-    b64  = base64.b64encode(blob).decode()
-    # Create robust prompt
-    prompt = (
-        "You are a medical assistant AI. You will be provided with a document encoded in BASE64 format.\n\n"
-        "The document may be:\n"
-        "• A **Medication Prescription** — list all medications with quantity and dosage, using bullet points.\n"
-        "• A **Health Report** — summarize the content in under 100 words.\n\n"
-        "Do not add any reflection or commentary. Focus strictly on factual extraction.\n"
-        "BEGIN DOCUMENT\n"
-        f"BASE64_CONTENT:{b64}"
-    )
-    try:
-        summary = call_gemini(prompt)[:600]  # safety trim
-        logger.info(f"[SUMMARY] {summary}")
-        return {"status": "success", "summary": summary}
-    except Exception as e:
-        logger.error(f"[SUMMARISE_ERROR] {e}")
-        raise HTTPException(500, "Gemini summarisation failed")
-
-# ──────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     uvicorn.run("app:app", host="0.0.0.0", port=7860, log_level="debug")

@@ -22,7 +22,7 @@ const PROFILE_URL = 'https://binkhoale1812-medical-profile.hf.space';  // /get_p
 /* -------------------------------------------------------------------------- */
 /*  Auth – replace with context / secure store                                */
 /* -------------------------------------------------------------------------- */
-const auth = {username: 'Khoa', password: '122003', user_id: 'abc123'};
+const auth = {username: 'Khoa', password: '122003', user_id: 'bda550aa4e88'};
 
 /* -------------------------------------------------------------------------- */
 const FIELD_ORDER = [
@@ -33,6 +33,8 @@ const FIELD_ORDER = [
   'allergies',
   'pastMedicalHistory',
   'currentMedication',
+  'phone_number',
+  'email_address',  
   'disability',
   'insuranceCard',
   'address',
@@ -48,6 +50,8 @@ const ICONS = {
   allergies: 'exclamation-circle',
   pastMedicalHistory: 'file-medical',
   currentMedication: 'capsules',
+  phone_number: 'phone',         
+  email_address: 'envelope',     
   disability: 'wheelchair',
   insuranceCard: 'id-card',
   address: 'map-marker-alt',
@@ -72,9 +76,9 @@ const ProfileScreen = () => {
         body   : JSON.stringify({username: auth.username, password: auth.password})
       });
       const json = await res.json();
-      const [y, m, d] = (p.dob || '').split('-'); // Format Splitter
       if (res.ok && json.status === 'success') {
         const p = json.profile;
+        const [y, m, d] = (p.dob || '').split('-'); // Format Splitter
         setProfile({
           fullName:            p.name                     || '',
           dateOfBirth:         p.dob                      || '',
@@ -82,6 +86,8 @@ const ProfileScreen = () => {
           month: m || '',
           day: d || '',
           gender:              p.sex                      || '',
+          phone_number:        p.phone_number             || '',  
+          email_address:       p.email_address            || '',  
           bloodType:           p.blood_type               || '',
           allergies:           (p.allergies||[]).join(', '),
           pastMedicalHistory:  (p.medical_history||[]).join(', '),
@@ -107,8 +113,8 @@ const ProfileScreen = () => {
       name:               profile.fullName,
       dob: `${(profile.year||'0000').padStart(4,'0')}-${(profile.month||'01').padStart(2,'0')}-${(profile.day||'01').padStart(2,'0')}`,
       sex:                profile.gender,
-      phone_number:       '',
-      email_address:      auth.username,
+      phone_number:       profile.phone_number,     
+      email_address:      profile.email_address,    
       blood_type:         profile.bloodType,
       allergies:          profile.allergies.split(',').map(s=>s.trim()),
       medical_history:    profile.pastMedicalHistory.split(',').map(s=>s.trim()),
@@ -124,50 +130,59 @@ const ProfileScreen = () => {
     };
 
     try {
-      const r = await fetch(`${PROFILE_URL}/predict`, {
+      const r = await fetch(`${TRIAGE_URL}/profile`, {
         method : 'POST',
         headers: {'Content-Type':'application/json'},
         body   : JSON.stringify(payload)
       });
       const j = await r.json();
+      console.log('Update profile response:', j);
       if (j.status === 'success') {
         Alert.alert('Profile updated');
         setEditing(false);
-      } else { throw new Error(j.message); }
+      } else { throw new Error(j.message || 'Backend rejected profile'); }
     } catch (e) {
+      console.warn('❌ Fetch error:', e);
       Alert.alert('Save failed', e.message || 'Network error');
     }
   };
 
   /* ----------------------------- upload + summarise ---------------------- */
-  const pickAndSummarise = () => {
-    ImagePicker.launchDocument({selectionLimit: 1}, async (resp) => {
+  const pickAndSummarise = (targetField) => {
+    ImagePicker.launchDocument({ selectionLimit: 1 }, async (resp) => {
       if (resp.didCancel || resp.errorCode) return;
       const f = resp.assets[0];
       const form = new FormData();
       form.append('file', {
-        uri : f.uri,
+        uri: f.uri,
         type: f.type || 'application/pdf',
         name: f.fileName || 'upload'
       });
-      // Send file to FastAPI and summarise into text-content
+      // Connect to summarize endpoint
       try {
-        const r = await fetch(`${TRIAGE_URL}/summarize`, {
-          method : 'POST',
-          headers: {'Content-Type': 'multipart/form-data'},
-          body   : form
+        const r = await fetch(`${PROFILE_URL}/summarize`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'multipart/form-data' },
+          body: form
         });
         const j = await r.json();
         if (j.status === 'success') {
-          setProfile(p => ({
+          const today = new Date().toLocaleDateString("en-GB"); // dd/mm/yyyy
+          const newText = `\n${today}\n${j.summary}`;
+          setProfile((p) => ({
             ...p,
-            pastMedicalHistory : j.summary,
-            currentMedication  : j.summary
+            [targetField]: (p[targetField] + newText).trim()
           }));
-        } else throw new Error(j.message);
-      } catch (e) { Alert.alert('Summarise error', e.message); }
+          Alert.alert("Summary added to " + fmt(targetField));
+        } else {
+          throw new Error(j.message);
+        }
+      } catch (e) {
+        Alert.alert('Summarise error', e.message || 'Upload failed');
+      }
     });
   };
+  
 
   /* ---------------------------- UI helpers ------------------------------- */
   const fmt = (k) => k.replace(/([A-Z])/g, ' $1').replace(/^./, s=>s.toUpperCase());
@@ -209,19 +224,26 @@ const ProfileScreen = () => {
                 ) : (
                   <Text style={styles.value}>{profile.insuranceCard || 'Not specified'}</Text>
                 )
-              ) : key === 'pastMedicalHistory' || key === 'currentMedication' ? (
-                editing ? (
-                  <TextInput
-                    style={[styles.input, {height: 90, textAlignVertical: 'top'}]}
-                    multiline
-                    value={profile[key]}
-                    onChangeText={v => setProfile({...profile, [key]: v})}
-                    placeholder={`Enter ${fmt(key)}`}
-                  />
-                ) : (
-                  <Text style={styles.value}>{profile[key] || 'Not specified'}</Text>
-                )
-              ) : key === 'dateOfBirth' && editing ? (
+                ) : key === 'pastMedicalHistory' || key === 'currentMedication' ? (
+                  editing ? (
+                    <>
+                      <TextInput
+                        style={[styles.input, { height: 100, textAlignVertical: 'top' }]}
+                        multiline
+                        value={profile[key]}
+                        onChangeText={(v) => setProfile({ ...profile, [key]: v })}
+                        placeholder={`Enter ${fmt(key)}`}
+                      />
+                      <TouchableOpacity
+                        style={[styles.uploadBtn, { marginTop: 8 }]}
+                        onPress={() => pickAndSummarise(key)}>
+                        <Text style={{ color: '#007BFF' }}>Upload New Document</Text>
+                      </TouchableOpacity>
+                    </>
+                  ) : (
+                    <Text style={styles.value}>{profile[key] || 'Not specified'}</Text>
+                  )
+                ) : key === 'dateOfBirth' && editing ? (
                 <View style={{flexDirection: 'row', alignItems: 'center', gap: 4}}>
                   <TextInput
                     style={[styles.input, {width: 60}]}

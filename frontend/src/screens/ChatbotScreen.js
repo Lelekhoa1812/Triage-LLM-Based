@@ -16,6 +16,7 @@ import {
 import axios from 'axios';
 import {LanguageContext} from '../context/LanguageContext';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import Markdown from 'react-native-markdown-display'; // Render MarkDown
 
 const API_URL = 'https://BinKhoaLe1812-Medical-Chatbot.hf.space/chat';
 
@@ -59,21 +60,25 @@ const ChatbotScreen = () => {
 
   const sendMessage = async () => {
     if (!input.trim()) return;
-
-    const userMsg = {role: 'user', text: input.trim()};
-    setMessages(prevMessages => [...prevMessages, userMsg]);
+    // Send msg 
+    const userMsg = { role: 'user', text: input.trim() };
+    const updatedMessages = [...messagesRef.current, userMsg];
+    setMessages(updatedMessages);           // update state
+    messagesRef.current = updatedMessages;  // update ref
     setInput('');
     setLoading(true);
     animateNewMessage();
-
+    // Await for resp
     try {
       const response = await axios.post(API_URL, {
         query: userMsg.text,
         lang: language,
       });
-
-      const botMsg = {role: 'bot', text: response.data.response};
-      setMessages(prevMessages => [...prevMessages, botMsg]);
+      // Break JSON body
+      const botMsg = { role: 'bot', text: response.data.response };
+      const finalMessages = [...messagesRef.current, botMsg];
+      setMessages(finalMessages);
+      messagesRef.current = finalMessages;
       animateNewMessage();
     } catch (err) {
       const errorMsg = {
@@ -81,12 +86,14 @@ const ChatbotScreen = () => {
         text: "I'm having trouble connecting right now. Please try again in a moment.",
         isError: true,
       };
-      setMessages(prevMessages => [...prevMessages, errorMsg]);
+      const finalMessages = [...messagesRef.current, errorMsg];
+      setMessages(finalMessages);
+      messagesRef.current = finalMessages;
       animateNewMessage();
     }
-
+    // Don't wait
     setLoading(false);
-  };
+  };  
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -186,10 +193,15 @@ const ChatbotScreen = () => {
                     <Text style={styles.messageLabel}> DocBot</Text>
                   </View>
                 )}
-                <Text
-                  style={[styles.messageText, msg.isError && styles.errorText]}>
+                <Markdown
+                  style={{
+                    body: {fontSize: 16, color: '#1F2937'},
+                    strong: {fontWeight: 'bold'},
+                    em: {fontStyle: 'italic'},
+                    bullet_list: {marginLeft: 20},
+                  }}>
                   {msg.text}
-                </Text>
+                </Markdown>
               </Animated.View>
             </React.Fragment>
           ))}

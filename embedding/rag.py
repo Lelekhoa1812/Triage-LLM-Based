@@ -3,12 +3,15 @@ import uuid
 import faiss
 import numpy as np
 import uvicorn
-from fastapi import FastAPI, HTTPException, APIRouter, Body
+from fastapi import FastAPI, HTTPException, APIRouter, Body, File, UploadFile
+
 from pymongo import MongoClient
 from sentence_transformers import SentenceTransformer
 from typing import Union
 from model import UserData
 from dotenv import load_dotenv
+import base64
+from google import genai
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Logging Setup (Debugs)
@@ -28,8 +31,22 @@ for lib in ("pymongo", "urllib3", "httpx", "uvicorn",):
 # Load environment variables
 load_dotenv()
 
+
+# ──────────────────────────────────────────────────────────────────────────────
+# 1)  Server Side
+# ──────────────────────────────────────────────────────────────────────────────
 # --- FastAPI App ---
 app = FastAPI(title="User Data Embedding & Update Service")
+
+# Start-up
+llm_client = None
+@app.on_event("startup")
+async def load_models():
+    global llm_client
+    # Gemini client
+    llm_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+    logger.info("[MODEL] Gemini client ready")
+
 # Allow CORS bypass
 from fastapi.middleware.cors import CORSMiddleware
 app.add_middleware(
@@ -55,6 +72,10 @@ user_collection = db["Personal_Info"]
 # --- Embedding Model ---
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
+
+# ──────────────────────────────────────────────────────────────────────────────
+# 2)  Update Profile
+# ──────────────────────────────────────────────────────────────────────────────
 # --- Helpers ---
 def get_or_create_user(doc: UserData) -> str:
     """
@@ -182,6 +203,9 @@ async def update_user_data(data: UserData):
     return {"status": "success", "message": f"User {data.username} data embedded."}
 
 
+# ──────────────────────────────────────────────────────────────────────────────
+# 3)  Fetch Profile
+# ──────────────────────────────────────────────────────────────────────────────
 '''
 Expose RAG as a specific POST /predict endpoint
 This is since Hugging Face does not expose raw FastAPI endpoints (/update_user_data) to external callers in other Spaces unless:
@@ -205,12 +229,56 @@ async def get_user_profile(credentials: dict = Body(...)):
          {"email_address": username}
        ]
     })    
-    logger.info(f"[UPDATE] pointing to account at {username}, breakdown data: {username}, {password}")
+    # logger.info(f"[UPDATE] pointing to account at {username}, breakdown data: {username}, {password}")
     if not user:
         raise HTTPException(status_code=404, detail="User not found or incorrect credentials")
     # Append corresponding profile
     profile = user.get("profile", {})
     return {"status": "success", "profile": profile}
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# 4)  Document / Image  ➜  Gemini summary   (≤100 words)
+# ──────────────────────────────────────────────────────────────────────────────
+def call_gemini(prompt: str) -> str:
+    logger.info("[LLM] Generating summary prompt...")
+    resp = llm_client.models.generate_content(
+        model="gemini-2.5-flash-preview-04-17",
+        contents=prompt
+    )
+    text = "".join(part.text for part in resp.candidates[0].content.parts)
+    logger.info(f"[LLM] Output length: {len(text)} chars")
+    logger.info(f"[LLM] Output content: {text}")
+    return text
+
+@app.post("/summarize")
+async def summarize_doc(file: UploadFile = File(...)):
+    if file.content_type not in {
+        "application/pdf", "image/png", "image/jpeg", "image/jpg"
+    }:
+        raise HTTPException(415, "Unsupported file type")
+
+    # Read bytes + base64 encode so we can pass into Gemini prompt
+    blob = await file.read()
+    b64  = base64.b64encode(blob).decode()
+    # Create robust prompt
+    prompt = (
+        "You are a medical assistant AI. You will be provided with a document encoded in BASE64 format.\n\n"
+        "The document may be:\n"
+        "• A **Medication Prescription** — list all medications with quantity and dosage, using bullet points.\n"
+        "• A **Health Report** — summarize the content in under 100 words.\n\n"
+        "Do not add any reflection or commentary. Focus strictly on factual extraction.\n"
+        "BEGIN DOCUMENT\n"
+        f"BASE64_CONTENT:{b64}"
+    )
+    try:
+        summary = call_gemini(prompt)[:600]  # safety trim
+        logger.info(f"[SUMMARY] {summary}")
+        return {"status": "success", "summary": summary}
+    except Exception as e:
+        logger.error(f"[SUMMARISE_ERROR] {e}")
+        raise HTTPException(500, "Gemini summarisation failed")
+
 
 # --- Launch ---
 if __name__ == "__main__":
