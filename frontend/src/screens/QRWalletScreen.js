@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react';
+import React, {useContext} from 'react';
 import {
   View,
   Text,
@@ -8,29 +8,29 @@ import {
   Share,
   Alert,
   ScrollView,
+  Image,
 } from 'react-native';
-import QRCode from 'react-native-qrcode-svg';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import {ThemeContext} from '../context/ThemeContext';
 
+// Hardcoded user data (TODO: Replace with auth context or backend fetch)
+const user = {
+  user_id: 'bda550aa4e88',
+  name: 'Khoa',
+  emergency_contact: 'Jane Le (0400765432)',
+};
+
 const QRWalletScreen = () => {
   const {theme} = useContext(ThemeContext);
-  const [qrSize, setQrSize] = useState(220);
-
-  // Mocked user data - would come from your backend/auth system
-  const user = {
-    qr_id: 'USER-12345-QR',
-    name: 'John Doe',
-    emergency_contact: 'Jane Doe (555-123-4567)',
-  };
 
   // Function to share QR code ID
   const handleShareQR = async () => {
     try {
       await Share.share({
-        message: `My Medical QR ID: ${user.qr_id}`,
+        message: `My Medical QR ID: ${user.user_id}`,
       });
     } catch (error) {
+      console.error('Share QR error:', error);
       Alert.alert('Error', 'Could not share QR code');
     }
   };
@@ -54,7 +54,7 @@ const QRWalletScreen = () => {
         {
           text: 'Refresh',
           onPress: () => {
-            // In a real app, you would call an API to refresh the QR code
+            // TODO: Call API to refresh the QR code
             Alert.alert('Success', 'Your QR code has been refreshed');
           },
         },
@@ -62,15 +62,13 @@ const QRWalletScreen = () => {
     );
   };
 
-  // Colors based on theme
+  // Theme-based colors
   const isDark = theme?.mode === 'dark';
   const backgroundColor = isDark ? '#121212' : '#F8FAFC';
   const textColor = isDark ? '#FFFFFF' : '#1F2937';
   const secondaryTextColor = isDark ? '#A0A0A0' : '#6B7280';
   const cardBackground = isDark ? '#2C2C2E' : '#FFFFFF';
-  const borderColor = isDark ? '#3A3A3C' : '#E5E5EA';
-  const qrBackground = isDark ? '#FFFFFF' : '#FFFFFF';
-  const qrForeground = isDark ? '#1F2937' : '#1F2937';
+  const borderColor = isDark ? '#3A3A3C' : '#E5E7EB';
   const buttonBackground = isDark ? '#2C2C2E' : '#F2F2F7';
   const buttonTextColor = isDark ? '#FFFFFF' : '#1F2937';
   const iconColor = isDark ? '#8E8E93' : '#3A3A3C';
@@ -98,20 +96,17 @@ const QRWalletScreen = () => {
           </View>
 
           <View style={styles.qrContainer}>
-            <QRCode
-              value={user.qr_id}
-              size={qrSize}
-              color={qrForeground}
-              backgroundColor={qrBackground}
-              // logo={require('../../assets/images/logo.png')} // Add your logo here
-              logoSize={qrSize * 0.2}
-              logoBackgroundColor="white"
-              logoBorderRadius={5}
+            <Image
+              source={{
+                uri: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${user.user_id}`,
+              }}
+              style={styles.qrImage}
+              resizeMode="contain"
             />
           </View>
 
           <Text style={[styles.qrText, {color: textColor}]}>
-            ID: {user.qr_id}
+            ID: {user.user_id}
           </Text>
 
           <View style={styles.emergencyInfo}>
@@ -177,7 +172,7 @@ const QRWalletScreen = () => {
             believe it has been compromised.
           </Text>
         </View>
-        <View style={{height: 100}} />
+        <View style={styles.bottomSpacer} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -193,7 +188,7 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 10,
   },
   title: {
     fontFamily: 'Inter-SemiBold',
@@ -208,20 +203,16 @@ const styles = StyleSheet.create({
   },
   qrCardContainer: {
     alignItems: 'center',
-    padding: 24,
-    borderRadius: 20,
+    padding: 20,
+    borderRadius: 16,
     borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
     elevation: 3,
-    marginBottom: 24,
+    marginBottom: 14,
   },
   userInfoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 10,
     width: '100%',
   },
   userName: {
@@ -230,9 +221,14 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   qrContainer: {
-    padding: 16,
-    borderRadius: 16,
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
     marginBottom: 16,
+  },
+  qrImage: {
+    width: 150,
+    height: 150,
   },
   qrText: {
     fontFamily: 'Inter-SemiBold',
@@ -244,7 +240,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 6,
     paddingHorizontal: 12,
-    borderRadius: 20,
+    borderRadius: 12,
     backgroundColor: 'rgba(255, 149, 0, 0.1)',
   },
   emergencyText: {
@@ -265,9 +261,10 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 12,
     marginHorizontal: 5,
+    elevation: 2,
   },
   actionText: {
-    fontFamily: 'Inter-Medium',
+    fontFamily: 'Inter-SemiBold',
     fontSize: 15,
     marginLeft: 8,
   },
@@ -286,6 +283,9 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     fontSize: 14,
     lineHeight: 20,
+  },
+  bottomSpacer: {
+    height: 100,
   },
 });
 
