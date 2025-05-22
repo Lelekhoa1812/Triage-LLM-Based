@@ -26,6 +26,14 @@ const AppContent = () => {
   const [drones, setDrones] = useState([]); // still static unless drone API exists
   
   useEffect(() => {
+    // Save login attempt to localStorage prevent refresh clear
+    const auth = localStorage.getItem("auth");
+    if (auth) {
+      const { username, password } = JSON.parse(auth);
+      if (username && password) {
+        setIsLoggedIn(true);
+      }
+    }
     // Load patients and dispatch alerts from FastAPI
     const loadData = async () => {
       try {

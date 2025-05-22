@@ -171,6 +171,22 @@ const Dashboard = ({
     );
   };
 
+  // Helper function convert ts to hh:mm:ss dd/mm/yyyy
+  const formatTimestamp = (isoString) => {
+    const date = new Date(isoString);
+    const pad = (n) => (n < 10 ? '0' + n : n);
+    // Check variables
+    const hours = pad(date.getHours());
+    const minutes = pad(date.getMinutes());
+    const seconds = pad(date.getSeconds());
+    const day = pad(date.getDate());
+    const month = pad(date.getMonth() + 1);
+    const year = date.getFullYear();
+    // Create string
+    return `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
+  };
+  
+
   return (
     <div className="p-6 bg-gradient-to-br from-gray-900 to-black text-white min-h-screen">
       <motion.h1
@@ -304,7 +320,7 @@ const Dashboard = ({
                   <strong>Location:</strong> {alert.location}
                 </p>
                 <p className="text-gray-400">
-                  <strong>Time:</strong> {alert.timestamp}
+                  <strong>Time:</strong> {formatTimestamp(alert.timestamp)}
                 </p>
                 {!alert.handled && (
                   <button

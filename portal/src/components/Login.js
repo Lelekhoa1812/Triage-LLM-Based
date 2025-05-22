@@ -5,11 +5,27 @@ function Login({ setIsLoggedIn }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = () => {
-    if (username === "staff" && password === "password") {
-      setIsLoggedIn(true);
-    } else {
-      alert("Invalid credentials");
+  const handleLogin = async () => {
+    try {
+      const res = await fetch("https://binkhoale1812-triage-llm.hf.space/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.status === "success") {
+        const { user_id } = data;
+
+        // Persist to localStorage
+        localStorage.setItem("auth", JSON.stringify({ username, password, user_id }));
+        setIsLoggedIn(true);
+      } else {
+        alert(data.message || "Invalid credentials");
+      }
+    } catch (err) {
+      alert("Login failed. Please try again.");
+      console.error(err);
     }
   };
 
