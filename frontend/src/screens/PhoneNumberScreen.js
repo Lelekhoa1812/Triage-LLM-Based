@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
   flex: {flex: 1},
   scrollContent: {flexGrow: 1, padding: 20, justifyContent: 'center'},
   logoContainer: {alignItems: 'center', marginBottom: 40},
-  logo: {width: 300, height: 250},
+  logo: {width: 180, height: 150},
   title: {fontSize: 24, color: '#333', marginTop: 10},
   form: {gap: 15},
   input: {
