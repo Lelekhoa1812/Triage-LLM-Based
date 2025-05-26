@@ -314,8 +314,24 @@ const Dashboard = ({
                 animate={{ scale: 1 }}
               >
                 <p className="text-gray-200">
-                  <strong>Emergency:</strong> {alert.description}
+                  <strong>Emergency:</strong> {alert.profile?.Name || "Unknown"} ({alert.profile?.Age || "N/A"} years old)
                 </p>
+                <div className="text-gray-200 mt-2">
+                  <strong>Context:</strong>
+                  <ul className="list-disc ml-6 mt-1">
+                    {alert.highlights?.map((item, idx) => (
+                      <li key={idx}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="text-gray-200 mt-2">
+                  <strong>Recommendation:</strong>
+                  <ul className="list-disc ml-6 mt-1">
+                    {alert.recommendations?.map((item, idx) => (
+                      <li key={idx}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
                 <p className="text-gray-300">
                   <strong>Location:</strong> {alert.location}
                 </p>

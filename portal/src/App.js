@@ -49,7 +49,9 @@ const AppContent = () => {
           timestamp: d.timestamp,
           handled: false,
           profile: d.profile,
-          dispatch: d
+          dispatch: d,
+          highlights: d.highlights || "Context not available.", // Fallback
+          recommendations: d.recommendations || "No suggestion was given on this case, suggest mild severity.",
         }));
         // Break profile to items
         setPatients(

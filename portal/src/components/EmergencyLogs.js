@@ -12,19 +12,38 @@ function EmergencyLogs({ logs, setCurrentPage }) {
             {logs.map((log) => (
               <div key={log.id} className="p-4 border rounded-lg">
                 <p>
-                  <strong>Patient:</strong> {log.patientName}
+                  <strong>Patient:</strong> {log.profile?.Name || "Unknown"} ({log.profile?.Age || "N/A"} years old)
                 </p>
                 <p>
-                  <strong>Severity:</strong> {log.severity}
+                  <strong>Location:</strong> {log.profile?.Location || "N/A"}
                 </p>
                 <p>
-                  <strong>Medication Dispatched:</strong> {log.medication}
+                  <strong>Blood Type:</strong> {log.profile?.["Blood Type"] || "N/A"}
                 </p>
                 <p>
-                  <strong>Notes:</strong> {log.notes}
+                  <strong>Disability:</strong> {log.profile?.Disability || "N/A"}
                 </p>
                 <p>
-                  <strong>Timestamp:</strong> {log.timestamp}
+                  <strong>Emergency Contact:</strong> {log.profile?.["Emergency Contact"] || "N/A"}
+                </p> 
+                <div className="mt-2">
+                  <strong>Highlights:</strong>
+                  <ul className="list-disc ml-6 text-sm text-gray-700 mt-1">
+                    {log.highlights?.map((h, idx) => (
+                      <li key={idx}>{h}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="mt-2">
+                  <strong>Recommendation:</strong>
+                  <ul className="list-disc ml-6 text-sm text-gray-700 mt-1">
+                    {log.recommendations?.map((h, idx) => (
+                      <li key={idx}>{h}</li>
+                    ))}
+                  </ul>
+                </div>
+                <p className="mt-2 text-sm text-gray-600">
+                  <strong>Timestamp:</strong> {new Date(log.timestamp).toLocaleString()}
                 </p>
               </div>
             ))}
