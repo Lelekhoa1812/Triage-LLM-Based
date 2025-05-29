@@ -13,5 +13,14 @@ numpy
 pydantic
 
 # LLM
-google-genai
+# google-genai
 python-multipart
+
+# OCR
+gradio_client
+pillow
+# transformers # Depreciated since switching to API
+# accelerate
+# torch
+# torchvision
+

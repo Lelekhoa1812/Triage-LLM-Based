@@ -215,14 +215,26 @@ def rag_context(user_summary: dict, voice_text: str) -> str:
         return "Context retrieval failed."
 
 # Break down JSON body to classes (e.g., highlights, suggestions etc)
+import re
 def extract_json(text: str):
     try:
-        import re
+        # Remove triple backticks and language hints
         clean = re.sub(r"```(?:json)?", "", text, flags=re.IGNORECASE).strip("` \n")
-        return json.loads(clean)
-    except Exception as e:
+        # Find the first {...} block (simple JSON pattern match)
+        match = re.search(r"\{[\s\S]*\}", clean)
+        if match:
+            json_text = match.group(0)
+            return json.loads(json_text)
+        else:
+            logger.warning("[JSON_PARSE] No JSON object found.")
+            return None
+    except json.JSONDecodeError as e:
         logger.error(f"JSON parse error: {e}")
         return None
+    except Exception as e:
+        logger.error(f"Unexpected JSON error: {e}")
+        return None
+
 
 # Call LLM
 def call_gemini(prompt: str) -> str:

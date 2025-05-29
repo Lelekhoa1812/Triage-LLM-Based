@@ -187,7 +187,15 @@ async function handleFileUpload(targetField) {
       body: formData
     });
     // Append result with date as header
-    const result = await res.json();
+    let result;
+    const ctype = res.headers.get("content-type") || "";
+    if (ctype.includes("application/json")) {
+      result = await res.json();
+    } else {
+      // probably an HTML error page
+      const text = await res.text();
+      throw new Error(`Server error: ${res.status} – ${text.slice(0,120)}…`);
+    }    
     if (res.ok && result.status === "success") {
       const today = new Date().toLocaleDateString("en-GB"); // dd/mm/yyyy
       const newEntry = `\n${today}\n${result.summary}`;

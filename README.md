@@ -25,7 +25,9 @@ git push eb main
 ```
 
 CURL request to Service Portal
-```
+
+**PROMPT 1**:
+```bash
 curl -X POST https://dispatch-portal-amber.vercel.app/api/index \
   -H "Content-Type: application/json" \
   -d '{
@@ -45,5 +47,110 @@ curl -X POST https://dispatch-portal-amber.vercel.app/api/index \
     "highlights": ["Breathing difficulty", "Chest pain"],
     "recommendations": ["Dispatch drone", "Apply oxygen mask"],
     "medications": ["Aspirin"]
+  }'
+```
+
+**PROMPT 2**:
+```bash
+curl -X POST https://dispatch-portal-amber.vercel.app/api/index \
+  -H "Content-Type: application/json" \
+  -d '{
+    "action": "medication_request",
+    "status": "received",
+    "profile": {
+      "Name": "Alice Smith",
+      "Age": 29,
+      "Blood Type": "A+",
+      "Allergies": "Dust, Pollen",
+      "History": "Mild seasonal allergies",
+      "Meds": "Loratadine",
+      "Disability": "None",
+      "Emergency Contact": "Tom Smith - 0401 555 789",
+      "Location": "456 Garden Ave"
+    },
+    "highlights": ["Mild allergy flare-up", "Requesting antihistamines"],
+    "recommendations": ["Dispatch drone with antihistamines"],
+    "medications": ["Loratadine"]
+  }'
+```
+
+**PROMPT 3**:
+```bash
+curl -X POST https://dispatch-portal-amber.vercel.app/api/index \
+  -H "Content-Type: application/json" \
+  -d '{
+    "action": "medication_refill",
+    "status": "received",
+    "profile": {
+      "Name": "Mark Johnson",
+      "Age": 58,
+      "Blood Type": "B+",
+      "Allergies": "None",
+      "History": "Chronic hypertension",
+      "Meds": "Amlodipine",
+      "Disability": "None",
+      "Emergency Contact": "Linda Johnson - 0432 987 654",
+      "Location": "789 Elm Rd"
+    },
+    "highlights": ["Patient out of blood pressure medication"],
+    "recommendations": ["Drone delivery of medication"],
+    "medications": ["Amlodipine"]
+  }'
+```
+
+**PROMPT 4**:
+``` bash
+curl -X POST https://dispatch-portal-amber.vercel.app/api/index \
+  -H "Content-Type: application/json" \
+  -d '{
+    "action": "medication_delivery",
+    "status": "received",
+    "profile": {
+      "Name": "Sarah Lee",
+      "Age": 42,
+      "Blood Type": "AB-",
+      "Allergies": "Penicillin",
+      "History": "Type 2 Diabetes",
+      "Meds": "Metformin",
+      "Disability": "None",
+      "Emergency Contact": "Eric Lee - 0410 222 333",
+      "Location": "102 Health Blvd"
+    },
+    "highlights": ["Missed morning diabetes medication"],
+    "recommendations": ["Send Metformin via drone", "Monitor sugar levels"],
+    "medications": ["Metformin"]
+  }'
+```
+
+**PROMPT Emergency**:
+``` bash
+curl -X POST https://dispatch-portal-amber.vercel.app/api/index \
+  -H "Content-Type: application/json" \
+  -d '{
+    "action": "emergency",
+    "status": "received",
+    "profile": {
+      "Name": "Emma Wilson",
+      "Age": 32,
+      "Blood Type": "A+",
+      "Allergies": "None",
+      "History": "Gestational diabetes, first pregnancy",
+      "Meds": "Prenatal vitamins",
+      "Disability": "None",
+      "Emergency Contact": "Liam Wilson - 0420 555 123",
+      "Location": "210 Sunset Lane"
+    },
+    "highlights": [
+      "Pregnant patient in third trimester",
+      "Reported contractions and abdominal pain",
+      "Gestational diabetes history"
+    ],
+    "recommendations": [
+      "Immediate hospital transfer via ambulance",
+      "Monitor vital signs en route",
+      "Avoid high-sugar IV fluids due to diabetes",
+      "Contact obstetrics department for delivery prep"
+    ],
+    "medications": ["IV fluids (low glucose)", "Prenatal supplements"]
   }'
 ```

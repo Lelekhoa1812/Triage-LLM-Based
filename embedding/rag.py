@@ -11,7 +11,7 @@ from typing import Union
 from model import UserData
 from dotenv import load_dotenv
 import base64
-from google import genai
+# from google import genai
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Logging Setup (Debugs)
@@ -40,12 +40,12 @@ app = FastAPI(title="User Data Embedding & Update Service")
 
 # Start-up
 llm_client = None
-@app.on_event("startup")
-async def load_models():
-    global llm_client
-    # Gemini client
-    llm_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-    logger.info("[MODEL] Gemini client ready")
+# @app.on_event("startup")
+# async def load_models():
+#     global llm_client
+#     # Gemini client
+#     llm_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+#     logger.info("[MODEL] Gemini client ready")
 
 # Allow CORS bypass
 from fastapi.middleware.cors import CORSMiddleware
@@ -240,45 +240,88 @@ async def get_user_profile(credentials: dict = Body(...)):
 # ──────────────────────────────────────────────────────────────────────────────
 # 4)  Document / Image  ➜  Gemini summary   (≤100 words)
 # ──────────────────────────────────────────────────────────────────────────────
-def call_gemini(prompt: str) -> str:
-    logger.info("[LLM] Generating summary prompt...")
-    resp = llm_client.models.generate_content(
-        model="gemini-2.5-flash-preview-04-17",
-        contents=prompt
-    )
-    text = "".join(part.text for part in resp.candidates[0].content.parts)
-    logger.info(f"[LLM] Output length: {len(text)} chars")
-    logger.info(f"[LLM] Output content: {text}")
-    return text
+# def call_gemini(prompt: str) -> str:
+#     logger.info("[LLM] Generating summary prompt...")
+#     resp = llm_client.models.generate_content(
+#         model="gemini-2.5-flash-preview-04-17",
+#         contents=prompt
+#     )
+#     text = "".join(part.text for part in resp.candidates[0].content.parts)
+#     logger.info(f"[LLM] Output length: {len(text)} chars")
+#     logger.info(f"[LLM] Output content: {text}")
+#     return text
 
+# Gemini-based summarizer
+# @app.post("/summarize")
+# async def summarize_doc(file: UploadFile = File(...)):
+#     if file.content_type not in {
+#         "application/pdf", "image/png", "image/jpeg", "image/jpg"
+#     }:
+#         raise HTTPException(415, "Unsupported file type")
+
+#     # Read bytes + base64 encode so we can pass into Gemini prompt
+#     blob = await file.read()
+#     b64  = base64.b64encode(blob).decode()
+#     # Create robust prompt
+#     prompt = (
+#         "You are a medical assistant AI. You will be provided with a document encoded in BASE64 format.\n\n"
+#         "The document may be:\n"
+#         "• A **Medication Prescription** — list all medications with quantity and dosage, using bullet points.\n"
+#         "• A **Health Report** — summarize the content in under 100 words.\n\n"
+#         "Do not add any reflection or commentary. Focus strictly on factual extraction.\n"
+#         "BEGIN DOCUMENT\n"
+#         f"BASE64_CONTENT:{b64}"
+#     )
+#     try:
+#         summary = call_gemini(prompt)[:600]  # safety trim
+#         logger.info(f"[SUMMARY] {summary}")
+#         return {"status": "success", "summary": summary}
+#     except Exception as e:
+#         logger.error(f"[SUMMARISE_ERROR] {e}")
+#         raise HTTPException(500, "Gemini summarisation failed")
+
+
+# Qwen2.5-VL-based summarizer 
+# Via loader (limitation of resource)
+from fastapi import UploadFile, File, HTTPException
+from gradio_client import Client, handle_file
+import tempfile
+import os
+# Init Gradio Qwen Client
+qwen_client = Client("prithivMLmods/Qwen2.5-VL-7B-Instruct")
+logger.info("[Qwen] Using remote API via Gradio Client")
 @app.post("/summarize")
 async def summarize_doc(file: UploadFile = File(...)):
-    if file.content_type not in {
-        "application/pdf", "image/png", "image/jpeg", "image/jpg"
-    }:
-        raise HTTPException(415, "Unsupported file type")
-
-    # Read bytes + base64 encode so we can pass into Gemini prompt
-    blob = await file.read()
-    b64  = base64.b64encode(blob).decode()
-    # Create robust prompt
-    prompt = (
-        "You are a medical assistant AI. You will be provided with a document encoded in BASE64 format.\n\n"
-        "The document may be:\n"
-        "• A **Medication Prescription** — list all medications with quantity and dosage, using bullet points.\n"
-        "• A **Health Report** — summarize the content in under 100 words.\n\n"
-        "Do not add any reflection or commentary. Focus strictly on factual extraction.\n"
-        "BEGIN DOCUMENT\n"
-        f"BASE64_CONTENT:{b64}"
-    )
+    if file.content_type not in {"image/png", "image/jpeg", "image/jpg"}:
+        raise HTTPException(415, "Only PNG or JPEG images are supported")
     try:
-        summary = call_gemini(prompt)[:600]  # safety trim
-        logger.info(f"[SUMMARY] {summary}")
-        return {"status": "success", "summary": summary}
+        # Save upload to temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp_file:
+            tmp_file.write(await file.read())
+            tmp_path = tmp_file.name
+        logger.info(f"[Qwen] Uploaded file saved to {tmp_path}, sending to API...")
+        instruction = (
+            "You are a medical assistant AI.\n\n"
+            "If the image is a **prescription**.\n"
+            "Extract ONLY the list of medications with dose and units. "
+            "Do NOT include any patient name, doctor name, clinic, or summaries.\n"
+            "Format your answer as:\n"
+            "- Medication: dose - instructions\n"
+            "Only list medications. Do not add comments.\n\n"
+            "Else if it is a health report, summarize the key findings in ≤ 100 words, no comments."
+        )
+        # Use Gradio client to send request
+        result = qwen_client.predict(
+            message={"text": instruction, "files": [handle_file(tmp_path)]},
+            api_name="/chat"
+        )
+        logger.info(f"[Qwen] ✅ API returned result: {result.strip()}")
+        os.remove(tmp_path)
+        return {"status": "success", "summary": result.strip()}
     except Exception as e:
-        logger.error(f"[SUMMARISE_ERROR] {e}")
-        raise HTTPException(500, "Gemini summarisation failed")
-
+        logger.error(f"[QWEN_SUMMARY_ERROR] {e}")
+        raise HTTPException(500, "Qwen summarisation via API failed")
+    
 
 # --- Launch ---
 if __name__ == "__main__":
