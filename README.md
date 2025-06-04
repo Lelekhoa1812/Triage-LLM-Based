@@ -24,8 +24,7 @@ git remote add eb https://huggingface.co/spaces/BinKhoaLe1812/Medical_Profile
 git push eb main
 ```
 
-CURL request to Service Portal
-
+# Portal
 **PROMPT 1**:
 ```bash
 curl -X POST https://dispatch-portal-amber.vercel.app/api/index \
@@ -152,5 +151,41 @@ curl -X POST https://dispatch-portal-amber.vercel.app/api/index \
       "Contact obstetrics department for delivery prep"
     ],
     "medications": ["IV fluids (low glucose)", "Prenatal supplements"]
+  }'
+```
+
+
+
+
+# Emergency
+**PROMPT 1**:
+```bash
+curl -X POST https://binkhoale1812-triage-llm.hf.space/emergency \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "bda550aa4e88",
+    "voice_text": "I slipped on the stairs and now my ankle is swollen and hurts to walk."
+  }'
+```
+
+
+**PROMPT 2**:
+```bash
+curl -X POST https://binkhoale1812-triage-llm.hf.space/emergency \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "bda550aa4e88",
+    "voice_text": "I have asthma and I can barely breathe right now. I used my inhaler but it didn’t help."
+  }'
+```
+
+
+**PROMPT 3**:
+```bash
+curl -X POST https://binkhoale1812-triage-llm.hf.space/emergency \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "bda550aa4e88",
+    "voice_text": "I have sharp chest pain and it’s spreading to my left arm. I feel dizzy and cold."
   }'
 ```
