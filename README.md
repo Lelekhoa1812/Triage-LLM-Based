@@ -27,63 +27,25 @@ Cross-platform application for patients to:
 * Scan QR for secure drone delivery verification
 
 <div align="center">
-  <strong>Credential Screen</strong>
-</div>
-<div align="center">
-  <img src="src/cred.png" alt="Credential" width="100" height="230"/>
-</div>
-
-
-<div align="center">
-  <strong>Chatbot Screen</strong>
-<table>
-  <tr>
-    <td><img src="src/bot1.png" alt="Bot" width="100" height="230"/></td>
-    <td><img src="src/bot2.png" alt="Bot" width="100" height="230"/></td>
-  </tr>
-  <tr>
-    <td align="center"></td>
-    <td align="center"></td>
-  </tr>
-</table>
-</div>
-
-
-<div align="center">
-  <strong>Medical Profile Screen</strong>
-<table>
-  <tr>
-    <td><img src="src/mp1.png" alt="MP" width="100" height="230"/></td>
-    <td><img src="src/mp2.png" alt="MP" width="100" height="230"/></td>
-  </tr>
-  <tr>
-    <td align="center"></td>
-    <td align="center"></td>
-  </tr>
-</table>
-</div>
-
-
-<div align="center">
-  <strong>Emergency Request Screen</strong>
-<table>
-  <tr>
-    <td><img src="src/voi1.png" alt="Voice" width="100" height="230"/></td>
-    <td><img src="src/voi2.png" alt="Voice" width="100" height="230"/></td>
-  </tr>
-  <tr>
-    <td align="center"></td>
-    <td align="center"></td>
-  </tr>
-</table>
-</div>
-
-
-<div align="center">
-  <strong>QR Wallet Screen</strong>
-</div>
-<div align="center">
-  <img src="src/qr.png" alt="QR" width="100" height="230"/>
+  <table>
+    <tr>
+      <th colspan="1" style="text-align:center;"><strong>Credential Screen</strong></th>
+      <th colspan="2" style="text-align:center;"><strong>Chatbot Screen</strong></th>
+      <th colspan="2" style="text-align:center;"><strong>Medical Profile Screen</strong></th>
+      <th colspan="2" style="text-align:center;"><strong>Emergency Request Screen</strong></th>
+      <th colspan="1" style="text-align:center;"><strong>QR Wallet Screen</strong></th>
+    </tr>
+    <tr>
+      <td><img src="src/cred.png" alt="Cred" width="100" height="230"/></td>
+      <td><img src="src/bot1.png" alt="Bot1" width="100" height="230"/></td>
+      <td><img src="src/bot2.png" alt="Bot2" width="100" height="230"/></td>
+      <td><img src="src/mp1.png" alt="MP1" width="100" height="230"/></td>
+      <td><img src="src/mp2.png" alt="MP2" width="100" height="230"/></td>
+      <td><img src="src/voi1.png" alt="Voice1" width="100" height="230"/></td>
+      <td><img src="src/voi2.png" alt="Voice2" width="100" height="230"/></td>
+      <td><img src="src/qr.png" alt="QR" width="100" height="230"/></td>
+    </tr>
+  </table>
 </div>
 
 ---
