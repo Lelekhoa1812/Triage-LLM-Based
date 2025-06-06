@@ -35,8 +35,8 @@ Cross-platform application for patients to:
 **Chatbot Screen**
 <table>
   <tr>
-    <td><img src="src/bot1.png" alt="Bot" width="300" height="230"/></td>
-    <td><img src="src/bot2.png" alt="Bot" width="300" height="230"/></td>
+    <td><img src="src/bot1.png" alt="Bot" width="100" height="230"/></td>
+    <td><img src="src/bot2.png" alt="Bot" width="100" height="230"/></td>
   </tr>
   <tr>
     <td align="center"></td>
@@ -48,8 +48,8 @@ Cross-platform application for patients to:
 **Medical Profile Screen**
 <table>
   <tr>
-    <td><img src="src/mp1.png" alt="MP" width="300" height="230"/></td>
-    <td><img src="src/mp2.png" alt="MP" width="300" height="230"/></td>
+    <td><img src="src/mp1.png" alt="MP" width="100" height="230"/></td>
+    <td><img src="src/mp2.png" alt="MP" width="100" height="230"/></td>
   </tr>
   <tr>
     <td align="center"></td>
@@ -61,8 +61,8 @@ Cross-platform application for patients to:
 **Emergency Request Screen**
 <table>
   <tr>
-    <td><img src="src/voi1.png" alt="Voice" width="300" height="230"/></td>
-    <td><img src="src/voi2.png" alt="Voice" width="300" height="230"/></td>
+    <td><img src="src/voi1.png" alt="Voice" width="100" height="230"/></td>
+    <td><img src="src/voi2.png" alt="Voice" width="100" height="230"/></td>
   </tr>
   <tr>
     <td align="center"></td>
