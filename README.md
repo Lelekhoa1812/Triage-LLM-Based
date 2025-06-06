@@ -76,21 +76,10 @@ Two containerized microservices deployed on Hugging Face Spaces:
 To run backend locally:
 
 ```bash
-git clone https://github.com/<your-repo>
-cd triage-backend
+git clone https://github.com/Lelekhoa1812/Triage-LLM-Based
+cd backend
 pip install -r requirements.txt
 uvicorn app:app --reload --port 7860
-```
-
-### Environment Variables
-
-Set the following in `.env`:
-
-```env
-GEMINI_API_KEY=your_google_key
-PROFILE_URI=mongodb_profile_cluster_uri
-TRIAGE_URI=mongodb_triage_cluster_uri
-HOSPITAL_API=https://dispatch-portal-amber.vercel.app/api/index
 ```
 
 ## Contributors
@@ -103,7 +92,3 @@ HOSPITAL_API=https://dispatch-portal-amber.vercel.app/api/index
 ## License
 
 © 2024 Swinburne University of Technology – Licensed for academic and research use only.
-
----
-
-For questions or demo requests, feel free to connect via LinkedIn or reach out through our project page at [Hugging Face](https://huggingface.co/spaces/BinKhoaLe1812).
