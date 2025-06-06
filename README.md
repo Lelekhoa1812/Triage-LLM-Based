@@ -28,7 +28,9 @@ Cross-platform application for patients to:
 
 <div align="center">
   <strong>Credential Screen</strong>
+  <tr>
   <img src="src/cred.png" alt="Credential" width="100" height="230"/>
+  </tr>
 </div>
 
 
