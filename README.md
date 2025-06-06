@@ -1,191 +1,109 @@
-Remote Vers:
+# Autonomous Drone Assistance for Medical Emergencies
 
-Main branch
+## Overview
+
+This project introduces an AI-powered emergency medical response system that integrates autonomous drone delivery, voice-activated mobile communication, and real-time clinical triage support. Designed for rapid deployment in rural and underserved areas, the system provides an efficient pipeline from patient alert to treatment recommendation and medical supply delivery.
+
+## System Architecture
+
+The architecture comprises four major components:
+
+### 1. Mobile Application (React Native)
+
+Cross-platform application for patients to:
+
+* Trigger emergencies using voice input (transcribed by Whisper-v3)
+* Access and manage their medical profiles
+* Upload prescriptions and reports (OCR processed using Qwen2.5-VL)
+* Scan QR for secure drone delivery verification
+
+### 2. Triage Web Portal (React)
+
+Hospital-side interface offering:
+
+* Emergency alert dashboard with LLM-driven suggestions
+* Severity classification and dispatch control (drone/ambulance)
+* Emergency log visualization (charts + history)
+* Drone live status tracking
+* Communication modules to notify nearby hospitals
+
+### 3. Backend Architecture (FastAPI)
+
+Two containerized microservices deployed on Hugging Face Spaces:
+
+#### RAG Service
+
+* User onboarding, authentication, and medical history embedding
+* OCR document summarization using Qwen2.5-VL
+* FAISS-based patient vector index stored in MongoDB
+
+#### Triage Service
+
+* Voice transcription with Whisper-large-v3
+* Contextual retrieval from MIMIC-IV v3.1 embedded QA dataset (364K+ patients)
+* Gemini 2.5 Pro generates treatment recommendations and medication suggestions
+* JSON-based dispatch instructions delivered to hospital systems
+
+### 4. Drone System (Great Shark 330 PRO VTOL)
+
+* Simulated with ArduPilot for waypoint navigation
+* Supports 10kg payload and real-time delivery visualization
+* QR code delivery verification logic (secured by user token + face-ID/PIN - prototype pending)
+
+## Technologies Used
+
+* **Languages/Frameworks:** Python, FastAPI, JavaScript, React, React Native
+* **AI Models:** Whisper-v3, Gemini 2.5 Pro, MiniLM, Qwen2.5-VL
+* **Databases:** MongoDB Atlas + GridFS
+* **Search & Retrieval:** FAISS
+* **Deployment:** Docker, Hugging Face Spaces, Vercel
+* **Dev Tools:** psutil, transformers, sentence-transformers, gradio\_client
+
+## Dataset
+
+* **MIMIC-IV v3.1**: Integrated as the triage QA source. Covers 65K ICU and 200K ED cases from Beth Israel Deaconess Medical Center. [Available here](https://physionet.org/content/mimiciv/3.1/)
+
+## How It Works
+
+1. **User triggers an emergency** via mobile app voice input
+2. **Voice is transcribed** by Whisper and merged with user profile context
+3. **FAISS retrieves** top 3 similar MIMIC-IV triage cases
+4. **Gemini LLM generates** structured output (actions, medication, severity)
+5. **Suggestions are visualized** in hospital portal, and human-in-the-loop decides next action (dispatch or escalate)
+
+## Installation
+
+To run backend locally:
+
 ```bash
-git remote add origin https://github.com/Lelekhoa1812/Triage-LLM-Based.git
-git push origin main
+git clone https://github.com/<your-repo>
+cd triage-backend
+pip install -r requirements.txt
+uvicorn app:app --reload --port 7860
 ```
 
-Backend branch
-```bash
-git remote add hf https://huggingface.co/spaces/BinKhoaLe1812/Triage_LLM
-git push hf main
+### Environment Variables
+
+Set the following in `.env`:
+
+```env
+GEMINI_API_KEY=your_google_key
+PROFILE_URI=mongodb_profile_cluster_uri
+TRIAGE_URI=mongodb_triage_cluster_uri
+HOSPITAL_API=https://dispatch-portal-amber.vercel.app/api/index
 ```
 
-Frontend branch
-```bash
-git remote add fe https://github.com/Lelekhoa1812/Triage-LLM-Based.git
-git push fe master
-```
+## Contributors
 
-Embedding branch
-```bash
-git remote add eb https://huggingface.co/spaces/BinKhoaLe1812/Medical_Profile
-git push eb main
-```
+* Dang Khoa Le
+* Liam Edmonds-Seng
+* Aarush Singh
+* Erfan Mangani
 
-# Portal
-**PROMPT 1**:
-```bash
-curl -X POST https://dispatch-portal-amber.vercel.app/api/index \
-  -H "Content-Type: application/json" \
-  -d '{
-    "action": "emergency",
-    "status": "received",
-    "profile": {
-      "Name": "John Doe",
-      "Age": 45,
-      "Blood Type": "O+",
-      "Allergies": "Peanuts",
-      "History": "Hypertension",
-      "Meds": "Lisinopril",
-      "Disability": "None",
-      "Emergency Contact": "Jane Doe - 0400 123 456",
-      "Location": "123 Main St"
-    },
-    "highlights": ["Breathing difficulty", "Chest pain"],
-    "recommendations": ["Dispatch drone", "Apply oxygen mask"],
-    "medications": ["Aspirin"]
-  }'
-```
+## License
 
-**PROMPT 2**:
-```bash
-curl -X POST https://dispatch-portal-amber.vercel.app/api/index \
-  -H "Content-Type: application/json" \
-  -d '{
-    "action": "medication_request",
-    "status": "received",
-    "profile": {
-      "Name": "Alice Smith",
-      "Age": 29,
-      "Blood Type": "A+",
-      "Allergies": "Dust, Pollen",
-      "History": "Mild seasonal allergies",
-      "Meds": "Loratadine",
-      "Disability": "None",
-      "Emergency Contact": "Tom Smith - 0401 555 789",
-      "Location": "456 Garden Ave"
-    },
-    "highlights": ["Mild allergy flare-up", "Requesting antihistamines"],
-    "recommendations": ["Dispatch drone with antihistamines"],
-    "medications": ["Loratadine"]
-  }'
-```
+© 2024 Swinburne University of Technology – Licensed for academic and research use only.
 
-**PROMPT 3**:
-```bash
-curl -X POST https://dispatch-portal-amber.vercel.app/api/index \
-  -H "Content-Type: application/json" \
-  -d '{
-    "action": "medication_refill",
-    "status": "received",
-    "profile": {
-      "Name": "Mark Johnson",
-      "Age": 58,
-      "Blood Type": "B+",
-      "Allergies": "None",
-      "History": "Chronic hypertension",
-      "Meds": "Amlodipine",
-      "Disability": "None",
-      "Emergency Contact": "Linda Johnson - 0432 987 654",
-      "Location": "789 Elm Rd"
-    },
-    "highlights": ["Patient out of blood pressure medication"],
-    "recommendations": ["Drone delivery of medication"],
-    "medications": ["Amlodipine"]
-  }'
-```
+---
 
-**PROMPT 4**:
-``` bash
-curl -X POST https://dispatch-portal-amber.vercel.app/api/index \
-  -H "Content-Type: application/json" \
-  -d '{
-    "action": "medication_delivery",
-    "status": "received",
-    "profile": {
-      "Name": "Sarah Lee",
-      "Age": 42,
-      "Blood Type": "AB-",
-      "Allergies": "Penicillin",
-      "History": "Type 2 Diabetes",
-      "Meds": "Metformin",
-      "Disability": "None",
-      "Emergency Contact": "Eric Lee - 0410 222 333",
-      "Location": "102 Health Blvd"
-    },
-    "highlights": ["Missed morning diabetes medication"],
-    "recommendations": ["Send Metformin via drone", "Monitor sugar levels"],
-    "medications": ["Metformin"]
-  }'
-```
-
-**PROMPT Emergency**:
-``` bash
-curl -X POST https://dispatch-portal-amber.vercel.app/api/index \
-  -H "Content-Type: application/json" \
-  -d '{
-    "action": "emergency",
-    "status": "received",
-    "profile": {
-      "Name": "Emma Wilson",
-      "Age": 32,
-      "Blood Type": "A+",
-      "Allergies": "None",
-      "History": "Gestational diabetes, first pregnancy",
-      "Meds": "Prenatal vitamins",
-      "Disability": "None",
-      "Emergency Contact": "Liam Wilson - 0420 555 123",
-      "Location": "210 Sunset Lane"
-    },
-    "highlights": [
-      "Pregnant patient in third trimester",
-      "Reported contractions and abdominal pain",
-      "Gestational diabetes history"
-    ],
-    "recommendations": [
-      "Immediate hospital transfer via ambulance",
-      "Monitor vital signs en route",
-      "Avoid high-sugar IV fluids due to diabetes",
-      "Contact obstetrics department for delivery prep"
-    ],
-    "medications": ["IV fluids (low glucose)", "Prenatal supplements"]
-  }'
-```
-
-
-
-
-# Emergency
-**PROMPT 1**:
-```bash
-curl -X POST https://binkhoale1812-triage-llm.hf.space/emergency \
-  -H "Content-Type: application/json" \
-  -d '{
-    "user_id": "bda550aa4e88",
-    "voice_text": "I slipped on the stairs and now my ankle is swollen and hurts to walk."
-  }'
-```
-
-
-**PROMPT 2**:
-```bash
-curl -X POST https://binkhoale1812-triage-llm.hf.space/emergency \
-  -H "Content-Type: application/json" \
-  -d '{
-    "user_id": "bda550aa4e88",
-    "voice_text": "I have asthma and I can barely breathe right now. I used my inhaler but it didn’t help."
-  }'
-```
-
-
-**PROMPT 3**:
-```bash
-curl -X POST https://binkhoale1812-triage-llm.hf.space/emergency \
-  -H "Content-Type: application/json" \
-  -d '{
-    "user_id": "bda550aa4e88",
-    "voice_text": "I have sharp chest pain and it’s spreading to my left arm. I feel dizzy and cold."
-  }'
-```
+For questions or demo requests, feel free to connect via LinkedIn or reach out through our project page at [Hugging Face](https://huggingface.co/spaces/BinKhoaLe1812).
