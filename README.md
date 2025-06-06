@@ -27,6 +27,8 @@ Hospital-side interface offering:
 * Drone live status tracking
 * Communication modules to notify nearby hospitals
 
+[Access site](https://dispatch-portal-amber.vercel.app)
+
 ### 3. Backend Architecture (FastAPI)
 
 Two containerized microservices deployed on Hugging Face Spaces:
@@ -37,12 +39,17 @@ Two containerized microservices deployed on Hugging Face Spaces:
 * OCR document summarization using Qwen2.5-VL
 * FAISS-based patient vector index stored in MongoDB
 
+[Endpoint](https://huggingface.co/spaces/BinKhoaLe1812/Medical_Profile)
+
 #### Triage Service
 
 * Voice transcription with Whisper-large-v3
 * Contextual retrieval from MIMIC-IV v3.1 embedded QA dataset (364K+ patients)
 * Gemini 2.5 Pro generates treatment recommendations and medication suggestions
 * JSON-based dispatch instructions delivered to hospital systems
+
+[Endpoint](https://huggingface.co/spaces/BinKhoaLe1812/Triage_LLM)
+[Dashboard](https://binkhoale1812-triage-llm.hf.space/)
 
 ### 4. Drone System (Great Shark 330 PRO VTOL)
 
@@ -52,7 +59,7 @@ Two containerized microservices deployed on Hugging Face Spaces:
 
 ## Technologies Used
 
-* **Languages/Frameworks:** Python, FastAPI, JavaScript, React, React Native
+* **Languages/Frameworks:** Python, FastAPI, JavaScript, React, React Native, NodeJS
 * **AI Models:** Whisper-v3, Gemini 2.5 Pro, MiniLM, Qwen2.5-VL
 * **Databases:** MongoDB Atlas + GridFS
 * **Search & Retrieval:** FAISS
