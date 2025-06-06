@@ -26,13 +26,14 @@ Cross-platform application for patients to:
 * Upload prescriptions and reports (OCR processed using Qwen2.5-VL)
 * Scan QR for secure drone delivery verification
 
-**Credential Screen**
 <div align="center">
+  <strong>Credential Screen</strong>
   <img src="src/cred.png" alt="Credential" width="100" height="230"/>
 </div>
 
 
-**Chatbot Screen**
+<div align="center">
+  <strong>Chatbot Screen</strong>
 <table>
   <tr>
     <td><img src="src/bot1.png" alt="Bot" width="100" height="230"/></td>
@@ -43,9 +44,11 @@ Cross-platform application for patients to:
     <td align="center"></td>
   </tr>
 </table>
+</div>
 
 
-**Medical Profile Screen**
+<div align="center">
+  <strong>Medical Profile Screen</strong>
 <table>
   <tr>
     <td><img src="src/mp1.png" alt="MP" width="100" height="230"/></td>
@@ -56,9 +59,11 @@ Cross-platform application for patients to:
     <td align="center"></td>
   </tr>
 </table>
+</div>
 
 
-**Emergency Request Screen**
+<div align="center">
+  <strong>Emergency Request Screen</strong>
 <table>
   <tr>
     <td><img src="src/voi1.png" alt="Voice" width="100" height="230"/></td>
@@ -69,10 +74,11 @@ Cross-platform application for patients to:
     <td align="center"></td>
   </tr>
 </table>
+</div>
 
 
-**QR Wallet Screen**
 <div align="center">
+  <strong>QR Wallet Screen</strong>
   <img src="src/qr.png" alt="QR" width="100" height="230"/>
 </div>
 
