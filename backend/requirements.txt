@@ -26,6 +26,7 @@ torch
 transformers
 accelerate
 ffmpeg-python
+gradio_client # API handler
 
 # RAG
 sentence-transformers

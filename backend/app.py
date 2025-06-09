@@ -340,21 +340,54 @@ async def handle_emergency(payload: Dict):
 # ──────────────────────────────────────────────────────────────────────────────
 # 3) Voice Transcription Endpoint (Accept wav and mp3 based format)
 # ──────────────────────────────────────────────────────────────────────────────
+## Local load
+# @app.post("/voice-transcribe")
+# async def voice_transcribe(file: UploadFile = File(...)):
+#     if file.content_type not in {"audio/wav","audio/mpeg"}:
+#         raise HTTPException(415,"Unsupported audio")
+#     # write to temp
+#     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
+#     tmp.write(await file.read()); tmp.close()
+#     # transcribe
+#     result = asr_pipe(tmp.name, batch_size=8)
+#     os.remove(tmp.name)
+#     text = result.get("text","").strip()
+#     logger.info(f"[WHISPER] Transcribed text: {text}")
+#     if not text:
+#         raise HTTPException(400,"No speech detected")
+#     return {"status":"success","transcription":text}
+## API handler
+from gradio_client import Client, handle_file
+import tempfile
+import os
+# Use whisper from gradio client 
+whisper_client = Client("freddyaboulton/really-fast-whisper")
+logger.info("[Whisper] Using remote Whisper API via Gradio Client")
+# Endpoint
 @app.post("/voice-transcribe")
 async def voice_transcribe(file: UploadFile = File(...)):
-    if file.content_type not in {"audio/wav","audio/mpeg"}:
-        raise HTTPException(415,"Unsupported audio")
-    # write to temp
-    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
-    tmp.write(await file.read()); tmp.close()
-    # transcribe
-    result = asr_pipe(tmp.name, batch_size=8)
-    os.remove(tmp.name)
-    text = result.get("text","").strip()
-    logger.info(f"[WHISPER] Transcribed text: {text}")
-    if not text:
-        raise HTTPException(400,"No speech detected")
-    return {"status":"success","transcription":text}
+    if file.content_type not in {"audio/wav", "audio/mpeg"}:
+        raise HTTPException(415, "Unsupported audio format")
+    # Write temp file
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+            tmp.write(await file.read())
+            tmp.flush()
+            tmp_path = tmp.name
+        logger.info(f"[Whisper] File saved to: {tmp_path}, sending to API...")
+        # Predict on client call
+        result = whisper_client.predict(
+            audio=handle_file(tmp_path),
+            language="<|en|>",
+            api_name="/predict"
+        )
+        # Clean cache after use
+        os.remove(tmp_path)
+        logger.info(f"[WHISPER] Transcribed text: {result.strip()}")
+        return {"status": "success", "transcription": result.strip()}
+    except Exception as e:
+        logger.error(f"[WHISPER_API_ERROR] {e}")
+        raise HTTPException(500, "Remote Whisper transcription failed")
 
 # ──────────────────────────────────────────────────────────────────────────────
 # 4) Auth & Profile Endpoints

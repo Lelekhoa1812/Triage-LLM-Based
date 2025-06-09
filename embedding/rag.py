@@ -312,8 +312,15 @@ async def summarize_doc(file: UploadFile = File(...)):
         )
         # Use Gradio client to send request
         result = qwen_client.predict(
-            message={"text": instruction, "files": [handle_file(tmp_path)]},
-            api_name="/chat"
+            model_name="Qwen2.5-VL-7B-Instruct",
+            text=instruction,
+            image=handle_file(tmp_path),
+            max_new_tokens=1024,
+            temperature=0.6,
+            top_p=0.9,
+            top_k=50,
+            repetition_penalty=1.2,
+            api_name="/generate_image"
         )
         logger.info(f"[Qwen] ✅ API returned result: {result.strip()}")
         os.remove(tmp_path)
